@@ -337,71 +337,135 @@ const SilverCalculator: React.FC = () => {
             </div>
 
             {/* Customer View Modal */}
-            {showCustomerView && selectedResult && (
-                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowCustomerView(false)}>
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-serif font-bold text-gray-700">Price Calculation</h2>
-                            <button onClick={() => setShowCustomerView(false)} className="text-text-main/60 hover:text-gray-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+            {showCustomerView && selectedResult && (() => {
+                const price = parseFloat(silverPrice);
+                const weight = parseFloat(silverWeight);
+                const purityDecimal = purity === '925' ? 0.925 : 0.999;
+                const purityPercentage = purity === '925' ? '92.5%' : '99.9%';
+                const effectiveSilverRate = price * purityDecimal;
+                const pureSilverWeight = weight * purityDecimal;
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowCustomerView(false)}>
+                        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-serif font-bold text-gray-700">💰 Price Breakdown</h2>
+                                <button onClick={() => setShowCustomerView(false)} className="text-text-main/60 hover:text-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Basic Details */}
+                                <div className="bg-gray-50 p-5 rounded-lg border border-gray-300">
+                                    <h3 className="font-semibold text-gray-700 mb-3 text-center text-lg">📊 Item Details</h3>
+                                    <div className="space-y-2 text-base">
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Silver Type:</span>
+                                            <span className="font-semibold text-text-main">{purity} ({purity === '925' ? 'Sterling Silver' : 'Pure Silver'})</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Total Weight:</span>
+                                            <span className="font-semibold text-text-main">{weight} grams</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Purity:</span>
+                                            <span className="font-semibold text-text-main">{purityPercentage} Pure Silver</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Pure Silver Weight:</span>
+                                            <span className="font-semibold text-text-main">{pureSilverWeight.toFixed(3)} grams</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Rate Information */}
+                                <div className="bg-gray-50 p-5 rounded-lg border border-gray-300">
+                                    <h3 className="font-semibold text-gray-700 mb-3 text-center text-lg">💵 Rate Information</h3>
+                                    <div className="space-y-2 text-base">
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Silver Rate (999/gram):</span>
+                                            <span className="font-semibold text-text-main">{formatCurrency(price)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Effective Rate ({purity}):</span>
+                                            <span className="font-semibold text-text-main">{formatCurrency(effectiveSilverRate)}/gram</span>
+                                        </div>
+                                        <div className="text-xs text-text-main/60 pl-4 italic">
+                                            ({formatCurrency(price)} × {purityPercentage})
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Detailed Calculation */}
+                                <div className="bg-gray-50 p-5 rounded-lg border border-gray-300">
+                                    <h3 className="font-semibold text-gray-700 mb-3 text-center text-lg">🧮 Price Calculation</h3>
+                                    <div className="space-y-3 text-base">
+                                        {/* Silver Value */}
+                                        <div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70 font-medium">1. Silver Value:</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
+                                            </div>
+                                            <div className="text-sm text-text-main/60 pl-4 mt-1">
+                                                {weight} grams × {formatCurrency(effectiveSilverRate)}/gram
+                                            </div>
+                                        </div>
+
+                                        {/* Making Charges */}
+                                        <div className="pt-2 border-t border-gray-300">
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70 font-medium">2. Making Charges ({selectedResult.percent}%):</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
+                                            </div>
+                                            <div className="text-sm text-text-main/60 pl-4 mt-1 space-y-1">
+                                                <div>• Percentage: {selectedResult.percent}% on total weight</div>
+                                                <div>• Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams</div>
+                                                <div>• Calculation: {weight} grams × {selectedResult.percent}% × {formatCurrency(price)}/gram</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Total */}
+                                <div className="bg-gradient-to-r from-gray-200 to-gray-100 p-5 rounded-lg border-2 border-gray-400">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-bold text-xl text-gray-700">Total Amount:</span>
+                                        <span className="font-bold text-2xl text-gray-700">{formatCurrency(selectedResult.total)}</span>
+                                    </div>
+                                    <div className="text-sm text-text-main/70 text-center">
+                                        ({formatCurrency(selectedResult.purityValue)} + {formatCurrency(selectedResult.wastageValue)})
+                                    </div>
+                                </div>
+
+                                {/* Per Gram Summary */}
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-300">
+                                    <h4 className="font-semibold text-gray-700 mb-2 text-center">📏 Per Gram Summary</h4>
+                                    <div className="text-sm space-y-1">
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Effective cost per gram:</span>
+                                            <span className="font-medium">{formatCurrency(selectedResult.total / weight)}/gram</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-text-main/70">Pure silver per gram:</span>
+                                            <span className="font-medium">{formatCurrency(selectedResult.purityValue / weight)}/gram</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setShowCustomerView(false)}
+                                className="mt-6 w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                            >
+                                Close
                             </button>
                         </div>
-
-                        <div className="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-300">
-                            <div className="pb-3 border-b border-gray-300">
-                                <h3 className="font-semibold text-gray-700 mb-3 text-center text-lg">Silver Details</h3>
-                                <div className="space-y-2 text-base">
-                                    <div className="flex justify-between">
-                                        <span className="text-text-main/70">Weight:</span>
-                                        <span className="font-semibold text-text-main">{silverWeight} grams</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-text-main/70">Purity:</span>
-                                        <span className="font-semibold text-text-main">{purity} ({purity === '925' ? 'Sterling' : 'Pure'})</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-text-main/70">Rate per gram:</span>
-                                        <span className="font-semibold text-text-main">{formatCurrency(parseFloat(silverPrice))}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pb-3 border-b border-gray-300">
-                                <h3 className="font-semibold text-gray-700 mb-3 text-center text-lg">Calculation Breakdown</h3>
-                                <div className="space-y-2 text-base">
-                                    <div className="flex justify-between">
-                                        <span className="text-text-main/70">Silver Value:</span>
-                                        <span className="font-medium text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-text-main/70">Making Charges:</span>
-                                        <span className="font-medium text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
-                                    </div>
-                                    <div className="text-xs text-text-main/60 pl-4">
-                                        ({selectedResult.wastageInGrams.toFixed(3)} grams equivalent)
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-gradient-to-r from-gray-300/40 to-gray-200/30 p-4 rounded-lg">
-                                <div className="flex justify-between items-center font-bold text-2xl text-gray-700">
-                                    <span>Total Amount:</span>
-                                    <span>{formatCurrency(selectedResult.total)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={() => setShowCustomerView(false)}
-                            className="mt-6 w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                            Close
-                        </button>
                     </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     );
 };
