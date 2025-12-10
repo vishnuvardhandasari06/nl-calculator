@@ -158,15 +158,15 @@ const SilverCalculator: React.FC = () => {
 
     const renderInputField = (label: string, value: string, setter: (val: string) => void, name: keyof typeof errors, placeholder: string) => (
         <div>
-            <label className="block text-sm font-medium text-text-main/90">{label}</label>
+            <label className="block text-lg font-medium text-text-main/90">{label}</label>
             <input
                 type="number"
                 value={value}
                 onChange={e => setter(e.target.value)}
                 placeholder={placeholder}
-                className={`mt-1 block w-full px-3 py-2 bg-white/50 border ${errors[name] ? 'border-highlight-red' : 'border-gray-400/50'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
+                className={`mt-1 block w-full px-4 py-3 bg-white/50 border ${errors[name] ? 'border-highlight-red' : 'border-gray-400/50'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-lg`}
             />
-            {errors[name] && <p className="mt-1 text-xs text-highlight-red">{errors[name]}</p>}
+            {errors[name] && <p className="mt-1 text-sm text-highlight-red">{errors[name]}</p>}
         </div>
     );
 
@@ -175,13 +175,13 @@ const SilverCalculator: React.FC = () => {
             {/* Left Column: Inputs & Saved */}
             <div className="flex flex-col gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-300/20 shadow-sm">
-                    <h3 className="text-lg font-serif font-bold text-gray-700 mb-4">Parameters</h3>
+                    <h3 className="text-2xl font-serif font-bold text-gray-700 mb-4">Parameters</h3>
                     <div className="space-y-4">
                         {renderInputField("Silver Price (per gram)", silverPrice, setSilverPrice, 'silverPrice', 'e.g., 85')}
                         {renderInputField("Silver Weight (grams)", silverWeight, setSilverWeight, 'silverWeight', 'e.g., 50')}
                         <div>
-                            <label className="block text-sm font-medium text-text-main/90">Purity</label>
-                            <select value={purity} onChange={e => setPurity(e.target.value as '925' | '999')} className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-400/50 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                            <label className="block text-lg font-medium text-text-main/90">Purity</label>
+                            <select value={purity} onChange={e => setPurity(e.target.value as '925' | '999')} className="mt-1 block w-full px-4 py-3 bg-white/50 border border-gray-400/50 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-lg">
                                 <option value="925">925 (Sterling Silver)</option>
                                 <option value="999">999 (Pure Silver)</option>
                             </select>
@@ -191,27 +191,27 @@ const SilverCalculator: React.FC = () => {
                             {renderInputField("Max Wastage %", maxPercent, setMaxPercent, 'maxPercent', 'e.g., 20')}
                         </div>
                         <div className="flex gap-4 pt-2">
-                            <button onClick={handleCalculate} className="w-full bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">Calculate</button>
-                            <button onClick={handleSave} className="w-full bg-white border border-gray-600 text-gray-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">Save</button>
+                            <button onClick={handleCalculate} className="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors text-lg">Calculate</button>
+                            <button onClick={handleSave} className="w-full bg-white border border-gray-600 text-gray-600 font-bold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors text-lg">Save</button>
                         </div>
                     </div>
                 </div>
                 <div className="flex-grow flex flex-col">
-                    <h3 className="text-lg font-serif font-bold text-gray-700 mb-2">Saved Calculations</h3>
+                    <h3 className="text-2xl font-serif font-bold text-gray-700 mb-2">Saved Calculations</h3>
                     <div className="flex-grow bg-gray-50 p-2 rounded-lg border border-gray-300/20 shadow-sm overflow-y-auto">
                         {savedCalculations.length > 0 ? (
                             <ul className="space-y-2">
                                 {savedCalculations.map(c => (
-                                    <li key={c.id} className="group flex items-center justify-between p-2 rounded-md hover:bg-gray-200/50 transition-colors">
+                                    <li key={c.id} className="group flex items-center justify-between p-3 rounded-md hover:bg-gray-200/50 transition-colors">
                                         <button onClick={() => loadCalculation(c)} className="text-left flex-grow">
-                                            <p className="font-semibold text-text-main">
+                                            <p className="font-semibold text-text-main text-base">
                                                 {c.silverWeight}g - {c.purity}
                                                 {c.selectedPercent !== undefined
                                                     ? <span className="text-gray-700"> - Selected: {c.selectedPercent}%</span>
                                                     : ` - ${c.minPercent}% to ${c.maxPercent}%`
                                                 }
                                             </p>
-                                            <p className="text-xs text-text-main/70">Total: {formatCurrency(calculateTotalFromParams(c))}</p>
+                                            <p className="text-sm text-text-main/70">Total: {formatCurrency(calculateTotalFromParams(c))}</p>
                                         </button>
                                         <button onClick={() => deleteCalculation(c.id)} className="ml-2 p-1 text-highlight-red/50 hover:text-highlight-red opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Delete saved calculation">
                                             <DeleteIcon />
@@ -229,7 +229,7 @@ const SilverCalculator: React.FC = () => {
             {/* Right Column: Results */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-300/20 shadow-sm flex flex-col">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-serif font-bold text-gray-700">Results</h3>
+                    <h3 className="text-2xl font-serif font-bold text-gray-700">Results</h3>
                     {results.length > 1 && (
                         <button
                             onClick={() => setShowProfitMargin(!showProfitMargin)}
@@ -278,10 +278,10 @@ const SilverCalculator: React.FC = () => {
 
                 {results.length > 0 && selectedResult ? (
                     <div className="mb-4 bg-white/50 p-4 rounded-md shadow-inner border border-gray-300/10">
-                        <h4 className="font-semibold text-text-main text-center mb-3 text-lg">
+                        <h4 className="font-semibold text-text-main text-center mb-3 text-xl">
                             Details for {selectedResult.percent}% Wastage
                         </h4>
-                        <div className="space-y-2 text-md">
+                        <div className="space-y-2 text-lg">
                             <div className="flex justify-between">
                                 <span className="text-text-main/80">Purity Value:</span>
                                 <span className="font-medium text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
@@ -290,14 +290,14 @@ const SilverCalculator: React.FC = () => {
                                 <span className="text-text-main/80">Wastage ({selectedResult.wastageInGrams.toFixed(3)} gm):</span>
                                 <span className="font-medium text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
                             </div>
-                            <div className="flex justify-between font-bold text-xl border-t-2 pt-2 mt-2 border-gray-400/30 text-gray-700">
+                            <div className="flex justify-between font-bold text-2xl border-t-2 pt-2 mt-2 border-gray-400/30 text-gray-700">
                                 <span>Total Price:</span>
                                 <span>{formatCurrency(selectedResult.total)}</span>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowCustomerView(true)}
-                            className="mt-4 w-full bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                            className="mt-4 w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-lg"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -315,12 +315,12 @@ const SilverCalculator: React.FC = () => {
                                 <li key={r.percent}>
                                     <button
                                         onClick={() => setSelectedResult(r)}
-                                        className={`w-full flex justify-between items-center p-2 rounded-md text-sm transition-colors ${selectedResult?.percent === r.percent ? 'bg-gray-300 text-text-main shadow-sm' : 'hover:bg-gray-200/50'}`}
+                                        className={`w-full flex justify-between items-center p-3 rounded-md text-base transition-colors ${selectedResult?.percent === r.percent ? 'bg-gray-300 text-text-main shadow-sm' : 'hover:bg-gray-200/50'}`}
                                     >
-                                        <span className={`font-bold ${selectedResult?.percent === r.percent ? '' : 'text-gray-700'}`}>{r.percent}%</span>
+                                        <span className={`font-bold text-lg ${selectedResult?.percent === r.percent ? '' : 'text-gray-700'}`}>{r.percent}%</span>
                                         <div className="text-right">
-                                            <p className="font-semibold">{formatCurrency(r.total)}</p>
-                                            <p className={`text-xs ${selectedResult?.percent === r.percent ? 'text-text-main/80' : 'text-text-main/70'}`}>
+                                            <p className="font-semibold text-base">{formatCurrency(r.total)}</p>
+                                            <p className={`text-sm ${selectedResult?.percent === r.percent ? 'text-text-main/80' : 'text-text-main/70'}`}>
                                                 Wastage: {formatCurrency(r.wastageValue)} ({r.wastageInGrams.toFixed(3)} gm)
                                             </p>
                                         </div>
