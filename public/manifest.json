@@ -1,12 +1,16 @@
 {
     "name": "NL Jewellers Calculator",
     "short_name": "NL Calculator",
-    "description": "Gold and Silver Price Calculator for NL Jewellers",
+    "description": "Gold and Silver Price Calculator for NL Jewellers - Works offline for instant calculations",
     "start_url": "/",
+    "scope": "/",
+    "id": "/",
     "display": "standalone",
     "background_color": "#FFF8E7",
     "theme_color": "#800000",
     "orientation": "portrait",
+    "lang": "en",
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "/icon-192.png",

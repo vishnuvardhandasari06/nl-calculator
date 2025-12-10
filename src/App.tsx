@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { GoldCalculator } from './Calculator';
 import { SilverCalculator } from './SilverCalculator';
+import InstallPrompt from './InstallPrompt';
+import OfflineIndicator from './OfflineIndicator';
 
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'gold' | 'silver'>('gold');
@@ -99,6 +101,10 @@ const App: React.FC = () => {
                     {activeTab === 'gold' ? <GoldCalculator /> : <SilverCalculator />}
                 </div>
             </div>
+
+            {/* PWA Components */}
+            <InstallPrompt />
+            <OfflineIndicator />
         </div>
     );
 };
