@@ -16,11 +16,11 @@ const App: React.FC = () => {
             <header style={{
                 background: 'linear-gradient(to right, #800000, #990000)',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                padding: '1.5rem 1rem',
+                padding: '2rem 1rem',
                 textAlign: 'center'
             }}>
                 <h1 style={{
-                    fontSize: '2rem',
+                    fontSize: '3rem',
                     fontFamily: '\'Playfair Display\', serif',
                     fontWeight: 'bold',
                     color: '#D4AF37',
@@ -31,7 +31,7 @@ const App: React.FC = () => {
                 </h1>
                 <p style={{
                     color: 'rgba(255, 248, 231, 0.8)',
-                    fontSize: '0.875rem'
+                    fontSize: '1.125rem'
                 }}>
                     Gold & Silver Price Calculator
                 </p>
@@ -57,10 +57,10 @@ const App: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('gold')}
                         style={{
-                            padding: '0.75rem 2rem',
+                            padding: '1rem 3rem',
                             borderRadius: '0.5rem',
                             fontWeight: '600',
-                            fontSize: '1rem',
+                            fontSize: '1.25rem',
                             transition: 'all 0.2s',
                             background: activeTab === 'gold' ? '#D4AF37' : 'rgba(255, 248, 231, 0.5)',
                             color: activeTab === 'gold' ? '#222' : 'rgba(34, 34, 34, 0.6)',
@@ -72,10 +72,10 @@ const App: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('silver')}
                         style={{
-                            padding: '0.75rem 2rem',
+                            padding: '1rem 3rem',
                             borderRadius: '0.5rem',
                             fontWeight: '600',
-                            fontSize: '1rem',
+                            fontSize: '1.25rem',
                             transition: 'all 0.2s',
                             background: activeTab === 'silver' ? '#9ca3af' : 'rgba(255, 248, 231, 0.5)',
                             color: activeTab === 'silver' ? '#fff' : 'rgba(34, 34, 34, 0.6)',
