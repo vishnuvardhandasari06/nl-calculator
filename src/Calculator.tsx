@@ -458,5 +458,5 @@ const CalculatorModal: React.FC<CalculatorModalProps> = ({ isOpen, onClose }) =>
     );
 };
 
-export default CalculatorModal;e x p o r t   {   G o l d C a l c u l a t o r   } ;  
- 
+export { GoldCalculator };
+export default CalculatorModal;

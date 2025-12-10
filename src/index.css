@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 * {
   margin: 0;
@@ -8,22 +6,20 @@
   box-sizing: border-box;
 }
 
-@layer base {
-  :root {
-    --ivory: #FFF8E7;
-    --primary-gold: #D4AF37;
-    --accent-maroon: #800000;
-    --highlight-red: #B22222;
-    --text-main: #222222;
-    --button-hover-gold: #A67C00;
-  }
+@theme {
+  --color-ivory: #FFF8E7;
+  --color-primary-gold: #D4AF37;
+  --color-accent-maroon: #800000;
+  --color-highlight-red: #B22222;
+  --color-text-main: #222222;
+  --color-button-hover-gold: #A67C00;
 }
 
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #FFF8E7 0%, #F5EDD8 100%);
   min-height: 100vh;
-  color: var(--text-main);
+  color: var(--color-text-main);
 }
 
 #root {
@@ -43,10 +39,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-gold);
+  background: var(--color-primary-gold);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--button-hover-gold);
+  background: var(--color-button-hover-gold);
 }
