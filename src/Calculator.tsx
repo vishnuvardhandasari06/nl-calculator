@@ -160,15 +160,15 @@ const GoldCalculator: React.FC = () => {
 
     const renderInputField = (label: string, value: string, setter: (val: string) => void, name: keyof typeof errors, placeholder: string) => (
         <div>
-            <label className="block text-lg font-medium text-text-main/90">{label}</label>
+            <label className="block text-xl md:text-lg font-medium text-text-main/90">{label}</label>
             <input
                 type="number"
                 value={value}
                 onChange={e => setter(e.target.value)}
                 placeholder={placeholder}
-                className={`mt-1 block w-full px-4 py-3 bg-ivory/50 border ${errors[name] ? 'border-highlight-red' : 'border-primary-gold/50'} rounded-md shadow-sm focus:outline-none focus:ring-primary-gold focus:border-primary-gold text-lg`}
+                className={`mt-1 block w-full px-4 py-4 md:py-3 bg-ivory/50 border ${errors[name] ? 'border-highlight-red' : 'border-primary-gold/50'} rounded-md shadow-sm focus:outline-none focus:ring-primary-gold focus:border-primary-gold text-xl md:text-lg`}
             />
-            {errors[name] && <p className="mt-1 text-sm text-highlight-red">{errors[name]}</p>}
+            {errors[name] && <p className="mt-1 text-base md:text-sm text-highlight-red">{errors[name]}</p>}
         </div>
     );
 
@@ -177,13 +177,13 @@ const GoldCalculator: React.FC = () => {
             {/* Left Column: Inputs & Saved */}
             <div className="flex flex-col gap-6">
                 <div className="bg-ivory/60 p-4 rounded-lg border border-primary-gold/20 shadow-sm">
-                    <h3 className="text-2xl font-serif font-bold text-accent-maroon mb-4">Parameters</h3>
+                    <h3 className="text-3xl md:text-2xl font-serif font-bold text-accent-maroon mb-4">Parameters</h3>
                     <div className="space-y-4">
                         {renderInputField("Gold Price (per gram)", goldPrice, setGoldPrice, 'goldPrice', 'e.g., 7200')}
                         {renderInputField("Gold Weight (grams)", goldWeight, setGoldWeight, 'goldWeight', 'e.g., 10')}
                         <div>
-                            <label className="block text-lg font-medium text-text-main/90">Purity</label>
-                            <select value={purity} onChange={e => setPurity(e.target.value as '916' | '750')} className="mt-1 block w-full px-4 py-3 bg-ivory/50 border border-primary-gold/50 rounded-md shadow-sm focus:outline-none focus:ring-primary-gold focus:border-primary-gold text-lg">
+                            <label className="block text-xl md:text-lg font-medium text-text-main/90">Purity</label>
+                            <select value={purity} onChange={e => setPurity(e.target.value as '916' | '750')} className="mt-1 block w-full px-4 py-4 md:py-3 bg-ivory/50 border border-primary-gold/50 rounded-md shadow-sm focus:outline-none focus:ring-primary-gold focus:border-primary-gold text-xl md:text-lg">
                                 <option value="916">916 (22K)</option>
                                 <option value="750">750 (18K)</option>
                             </select>
@@ -193,13 +193,13 @@ const GoldCalculator: React.FC = () => {
                             {renderInputField("Max Wastage %", maxPercent, setMaxPercent, 'maxPercent', 'e.g., 10')}
                         </div>
                         <div className="flex gap-4 pt-2">
-                            <button onClick={handleCalculate} className="w-full bg-primary-gold text-text-main font-bold py-3 px-4 rounded-lg hover:bg-button-hover-gold transition-colors text-lg">Calculate</button>
-                            <button onClick={handleSave} className="w-full bg-ivory border border-primary-gold text-primary-gold font-bold py-3 px-4 rounded-lg hover:bg-primary-gold/10 transition-colors text-lg">Save</button>
+                            <button onClick={handleCalculate} className="w-full bg-primary-gold text-text-main font-bold py-4 md:py-3 px-4 rounded-lg hover:bg-button-hover-gold transition-colors text-xl md:text-lg">Calculate</button>
+                            <button onClick={handleSave} className="w-full bg-ivory border border-primary-gold text-primary-gold font-bold py-4 md:py-3 px-4 rounded-lg hover:bg-primary-gold/10 transition-colors text-xl md:text-lg">Save</button>
                         </div>
                     </div>
                 </div>
                 <div className="flex-grow flex flex-col">
-                    <h3 className="text-2xl font-serif font-bold text-accent-maroon mb-2">Saved Calculations</h3>
+                    <h3 className="text-3xl md:text-2xl font-serif font-bold text-accent-maroon mb-2">Saved Calculations</h3>
                     <div className="flex-grow bg-ivory/60 p-2 rounded-lg border border-primary-gold/20 shadow-sm overflow-y-auto">
                         {savedCalculations.length > 0 ? (
                             <ul className="space-y-2">
@@ -231,7 +231,7 @@ const GoldCalculator: React.FC = () => {
             {/* Right Column: Results */}
             <div className="bg-ivory/60 p-4 rounded-lg border border-primary-gold/20 shadow-sm flex flex-col">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-2xl font-serif font-bold text-accent-maroon">Results</h3>
+                    <h3 className="text-3xl md:text-2xl font-serif font-bold text-accent-maroon">Results</h3>
                     {results.length > 1 && (
                         <button
                             onClick={() => setShowProfitMargin(!showProfitMargin)}
@@ -280,10 +280,10 @@ const GoldCalculator: React.FC = () => {
 
                 {results.length > 0 && selectedResult ? (
                     <div className="mb-4 bg-white/50 p-4 rounded-md shadow-inner border border-primary-gold/10">
-                        <h4 className="font-semibold text-text-main text-center mb-3 text-xl">
+                        <h4 className="font-semibold text-text-main text-center mb-3 text-2xl md:text-xl">
                             Details for {selectedResult.percent}% Wastage
                         </h4>
-                        <div className="space-y-2 text-lg">
+                        <div className="space-y-2 text-xl md:text-lg">
                             <div className="flex justify-between">
                                 <span className="text-text-main/80">Purity Value:</span>
                                 <span className="font-medium text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
@@ -292,14 +292,14 @@ const GoldCalculator: React.FC = () => {
                                 <span className="text-text-main/80">Wastage ({selectedResult.wastageInGrams.toFixed(3)} gm):</span>
                                 <span className="font-medium text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
                             </div>
-                            <div className="flex justify-between font-bold text-2xl border-t-2 pt-2 mt-2 border-primary-gold/30 text-accent-maroon">
+                            <div className="flex justify-between font-bold text-3xl md:text-2xl border-t-2 pt-2 mt-2 border-primary-gold/30 text-accent-maroon">
                                 <span>Total Price:</span>
                                 <span>{formatCurrency(selectedResult.total)}</span>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowCustomerView(true)}
-                            className="mt-4 w-full bg-accent-maroon text-white font-bold py-3 px-4 rounded-lg hover:bg-accent-maroon/90 transition-colors flex items-center justify-center gap-2 text-lg"
+                            className="mt-4 w-full bg-accent-maroon text-white font-bold py-4 md:py-3 px-4 rounded-lg hover:bg-accent-maroon/90 transition-colors flex items-center justify-center gap-2 text-xl md:text-lg"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -317,12 +317,12 @@ const GoldCalculator: React.FC = () => {
                                 <li key={r.percent}>
                                     <button
                                         onClick={() => setSelectedResult(r)}
-                                        className={`w-full flex justify-between items-center p-3 rounded-md text-base transition-colors ${selectedResult?.percent === r.percent ? 'bg-primary-gold text-text-main shadow-sm' : 'hover:bg-primary-gold/10'}`}
+                                        className={`w-full flex justify-between items-center p-3 rounded-md text-lg md:text-base transition-colors ${selectedResult?.percent === r.percent ? 'bg-primary-gold text-text-main shadow-sm' : 'hover:bg-primary-gold/10'}`}
                                     >
-                                        <span className={`font-bold text-lg ${selectedResult?.percent === r.percent ? '' : 'text-accent-maroon'}`}>{r.percent}%</span>
+                                        <span className={`font-bold text-2xl md:text-lg ${selectedResult?.percent === r.percent ? '' : 'text-accent-maroon'}`}>{r.percent}%</span>
                                         <div className="text-right">
-                                            <p className="font-semibold text-base">{formatCurrency(r.total)}</p>
-                                            <p className={`text-sm ${selectedResult?.percent === r.percent ? 'text-text-main/80' : 'text-text-main/70'}`}>
+                                            <p className="font-semibold text-lg md:text-base">{formatCurrency(r.total)}</p>
+                                            <p className={`text-base md:text-sm ${selectedResult?.percent === r.percent ? 'text-text-main/80' : 'text-text-main/70'}`}>
                                                 Wastage: {formatCurrency(r.wastageValue)} ({r.wastageInGrams.toFixed(3)} gm)
                                             </p>
                                         </div>
