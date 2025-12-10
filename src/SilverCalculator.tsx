@@ -174,9 +174,9 @@ const SilverCalculator: React.FC = () => {
         <div className="flex-grow p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 overflow-y-auto">
             {/* Left Column: Inputs & Saved */}
             <div className="flex flex-col gap-6">
-                <div className="bg-gray-50 p-6 rounded-lg border border-gray-300/20 shadow-sm">
+                <div className="bg-gray-50 p-8 rounded-lg border border-gray-300/20 shadow-sm">
                     <h3 className="text-3xl md:text-2xl font-serif font-bold text-gray-700 mb-4">Parameters</h3>
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                         {renderInputField("Silver Price (per gram)", silverPrice, setSilverPrice, 'silverPrice', 'e.g., 85')}
                         {renderInputField("Silver Weight (grams)", silverWeight, setSilverWeight, 'silverWeight', 'e.g., 50')}
                         <div>

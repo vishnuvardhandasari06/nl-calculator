@@ -176,9 +176,9 @@ const GoldCalculator: React.FC = () => {
         <div className="flex-grow p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 overflow-y-auto">
             {/* Left Column: Inputs & Saved */}
             <div className="flex flex-col gap-6">
-                <div className="bg-ivory/60 p-6 rounded-lg border border-primary-gold/20 shadow-sm">
+                <div className="bg-ivory/60 p-8 rounded-lg border border-primary-gold/20 shadow-sm">
                     <h3 className="text-3xl md:text-2xl font-serif font-bold text-accent-maroon mb-4">Parameters</h3>
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                         {renderInputField("Gold Price (per gram)", goldPrice, setGoldPrice, 'goldPrice', 'e.g., 7200')}
                         {renderInputField("Gold Weight (grams)", goldWeight, setGoldWeight, 'goldWeight', 'e.g., 10')}
                         <div>
