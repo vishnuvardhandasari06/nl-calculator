@@ -176,7 +176,7 @@ const GoldCalculator: React.FC = () => {
         <div className="flex-grow p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 overflow-y-auto">
             {/* Left Column: Inputs & Saved */}
             <div className="flex flex-col gap-6">
-                <div className="bg-ivory/60 p-4 rounded-lg border border-primary-gold/20 shadow-sm">
+                <div className="bg-ivory/60 p-6 rounded-lg border border-primary-gold/20 shadow-sm">
                     <h3 className="text-3xl md:text-2xl font-serif font-bold text-accent-maroon mb-4">Parameters</h3>
                     <div className="space-y-4">
                         {renderInputField("Gold Price (per gram)", goldPrice, setGoldPrice, 'goldPrice', 'e.g., 7200')}
@@ -204,16 +204,16 @@ const GoldCalculator: React.FC = () => {
                         {savedCalculations.length > 0 ? (
                             <ul className="space-y-2">
                                 {savedCalculations.map(c => (
-                                    <li key={c.id} className="group flex items-center justify-between p-3 rounded-md hover:bg-primary-gold/10 transition-colors">
+                                    <li key={c.id} className="group flex items-center justify-between p-4 md:p-3 rounded-md hover:bg-primary-gold/10 transition-colors">
                                         <button onClick={() => loadCalculation(c)} className="text-left flex-grow">
-                                            <p className="font-semibold text-text-main text-base">
+                                            <p className="font-semibold text-text-main text-xl md:text-base">
                                                 {c.goldWeight}g - {c.purity}
                                                 {c.selectedPercent !== undefined
                                                     ? <span className="text-accent-maroon"> - Selected: {c.selectedPercent}%</span>
                                                     : ` - ${c.minPercent}% to ${c.maxPercent}%`
                                                 }
                                             </p>
-                                            <p className="text-sm text-text-main/70">Total: {formatCurrency(calculateTotalFromParams(c))}</p>
+                                            <p className="text-lg md:text-sm text-text-main/70">Total: {formatCurrency(calculateTotalFromParams(c))}</p>
                                         </button>
                                         <button onClick={() => deleteCalculation(c.id)} className="ml-2 p-1 text-highlight-red/50 hover:text-highlight-red opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Delete saved calculation">
                                             <DeleteIcon />
@@ -258,9 +258,9 @@ const GoldCalculator: React.FC = () => {
                     const profit = selectedResult.total - minResult.total;
 
                     return (
-                        <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-md shadow-sm border-2 border-green-400/50">
-                            <h4 className="font-semibold text-green-800 text-center mb-2 text-base">💰 Profit Margin</h4>
-                            <div className="space-y-1 text-sm">
+                        <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 p-5 md:p-4 rounded-md shadow-sm border-2 border-green-400/50">
+                            <h4 className="font-semibold text-green-800 text-center mb-2 text-xl md:text-base">💰 Profit Margin</h4>
+                            <div className="space-y-1 text-lg md:text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-green-700/80">Selected ({selectedResult.percent}%):</span>
                                     <span className="font-medium text-green-800">{formatCurrency(selectedResult.total)}</span>
