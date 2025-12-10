@@ -416,16 +416,14 @@ const GoldCalculator: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Making Charges */}
+                                        {/* Wastage Charges */}
                                         <div className="pt-2 border-t border-primary-gold/20">
                                             <div className="flex justify-between">
-                                                <span className="text-text-main/70 font-medium">2. Making Charges ({selectedResult.percent}%):</span>
+                                                <span className="text-text-main/70 font-medium">2. Wastage Charges:</span>
                                                 <span className="font-semibold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
                                             </div>
-                                            <div className="text-sm text-text-main/60 pl-4 mt-1 space-y-1">
-                                                <div>• Percentage: {selectedResult.percent}% on total weight</div>
-                                                <div>• Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams</div>
-                                                <div>• Calculation: {weight} grams × {selectedResult.percent}% × {formatCurrency(price)}/gram</div>
+                                            <div className="text-sm text-text-main/60 pl-4 mt-1">
+                                                Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams
                                             </div>
                                         </div>
                                     </div>
