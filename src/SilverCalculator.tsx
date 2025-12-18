@@ -51,6 +51,7 @@ const SilverCalculator: React.FC = () => {
     const [silverPrice, setSilverPrice] = useState('');
     const [silverWeight, setSilverWeight] = useState('');
     const purity = '999'; // Fixed: Pure Silver 100%
+    const purityDecimal = 1.0; // 100% pure, no reduction
     const [minPercent, setMinPercent] = useState('8');
     const [maxPercent, setMaxPercent] = useState('15');
     const [errors, setErrors] = useState<Partial<Record<keyof Omit<SilverCalculationParams, 'id' | 'purity' | 'selectedPercent'>, string>>>({});
@@ -85,7 +86,7 @@ const SilverCalculator: React.FC = () => {
 
         const price = parseFloat(silverPrice);
         const weight = parseFloat(silverWeight);
-        const purityDecimal = 0.999; // Pure Silver 100%
+        const purityDecimal = 1.0; // Pure Silver 100%
 
         const min = parseInt(minPercent, 10);
         const max = parseInt(maxPercent, 10);
@@ -332,7 +333,7 @@ const SilverCalculator: React.FC = () => {
             {showCustomerView && selectedResult && (() => {
                 const price = parseFloat(silverPrice);
                 const weight = parseFloat(silverWeight);
-                const purityDecimal = 0.999; // Pure Silver 100%
+                const purityDecimal = 1.0; // Pure Silver 100%
                 const purityPercentage = '100%'; // Pure Silver
                 const effectiveSilverRate = price * purityDecimal;
                 const pureSilverWeight = weight * purityDecimal;
