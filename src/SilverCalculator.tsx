@@ -50,9 +50,9 @@ const calculateTotalFromParams = (params: SilverCalculationParams): number => {
 const SilverCalculator: React.FC = () => {
     const [silverPrice, setSilverPrice] = useState('');
     const [silverWeight, setSilverWeight] = useState('');
-    const [purity, setPurity] = useState<'925' | '999'>('925');
-    const [minPercent, setMinPercent] = useState('12');
-    const [maxPercent, setMaxPercent] = useState('20');
+    const purity = '999'; // Fixed: Pure Silver 100%
+    const [minPercent, setMinPercent] = useState('8');
+    const [maxPercent, setMaxPercent] = useState('15');
     const [errors, setErrors] = useState<Partial<Record<keyof Omit<SilverCalculationParams, 'id' | 'purity' | 'selectedPercent'>, string>>>({});
 
     const [results, setResults] = useState<ResultDetail[]>([]);
@@ -85,7 +85,7 @@ const SilverCalculator: React.FC = () => {
 
         const price = parseFloat(silverPrice);
         const weight = parseFloat(silverWeight);
-        const purityDecimal = purity === '925' ? 0.925 : 0.999;
+        const purityDecimal = 0.999; // Pure Silver 100%
 
         const min = parseInt(minPercent, 10);
         const max = parseInt(maxPercent, 10);
@@ -110,18 +110,7 @@ const SilverCalculator: React.FC = () => {
         } else {
             setSelectedResult(newResults[0] || null);
         }
-    }, [silverPrice, silverWeight, purity, minPercent, maxPercent, validate]);
-
-    // Auto-update wastage percentages based on purity
-    useEffect(() => {
-        if (purity === '925') {
-            setMinPercent('12');
-            setMaxPercent('20');
-        } else if (purity === '999') {
-            setMinPercent('8');
-            setMaxPercent('15');
-        }
-    }, [purity]);
+    }, [silverPrice, silverWeight, minPercent, maxPercent, validate]);
 
     useEffect(() => {
         if (loadRequest) {
@@ -147,7 +136,7 @@ const SilverCalculator: React.FC = () => {
     const loadCalculation = (params: SilverCalculationParams) => {
         setSilverPrice(params.silverPrice);
         setSilverWeight(params.silverWeight);
-        setPurity(params.purity);
+        // purity is now fixed to 999
         setMinPercent(params.minPercent);
         setMaxPercent(params.maxPercent);
         setLoadRequest(params);
@@ -182,10 +171,9 @@ const SilverCalculator: React.FC = () => {
                         {renderInputField("Silver Weight (grams)", silverWeight, setSilverWeight, 'silverWeight', 'e.g., 50')}
                         <div>
                             <label className="block text-xl md:text-lg font-medium text-text-main/90">Purity</label>
-                            <select value={purity} onChange={e => setPurity(e.target.value as '925' | '999')} className="mt-1 block w-full px-4 py-4 md:py-3 bg-white/50 border border-gray-400/50 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-xl md:text-lg">
-                                <option value="925">925 (Sterling Silver)</option>
-                                <option value="999">999 (Pure Silver)</option>
-                            </select>
+                            <div className="mt-1 block w-full px-4 py-4 md:py-3 bg-gray-100 border border-gray-400/50 rounded-md text-xl md:text-lg text-text-main font-semibold">
+                                999 (Pure Silver 100%)
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             {renderInputField("Min Wastage %", minPercent, setMinPercent, 'minPercent', 'e.g., 12')}
@@ -344,13 +332,13 @@ const SilverCalculator: React.FC = () => {
             {showCustomerView && selectedResult && (() => {
                 const price = parseFloat(silverPrice);
                 const weight = parseFloat(silverWeight);
-                const purityDecimal = purity === '925' ? 0.925 : 0.999;
-                const purityPercentage = purity === '925' ? '92.5%' : '99.9%';
+                const purityDecimal = 0.999; // Pure Silver 100%
+                const purityPercentage = '100%'; // Pure Silver
                 const effectiveSilverRate = price * purityDecimal;
                 const pureSilverWeight = weight * purityDecimal;
 
                 const handleShare = async () => {
-                    const shareText = `🏪 *NL JEWELLERS*\n\n🤍 *SILVER PRICE BREAKDOWN*\n\n📊 Item Details:\n• Silver Type: ${purity} (${purity === '925' ? 'Sterling Silver' : 'Pure Silver'})\n• Total Weight: ${weight} grams\n• Purity: ${purityPercentage} Pure Silver\n• Pure Silver Weight: ${pureSilverWeight.toFixed(3)} grams\n\n💵 Rate Information:\n• Silver Rate (999/gram): ${formatCurrency(price)}\n• Effective Rate (${purity}): ${formatCurrency(effectiveSilverRate)}/gram\n\n🧮 Price Calculation:\n1. Silver Value: ${formatCurrency(selectedResult.purityValue)}\n   (${weight} grams × ${formatCurrency(effectiveSilverRate)}/gram)\n\n2. Wastage Charges: ${formatCurrency(selectedResult.wastageValue)}\n   (Weight equivalent: ${selectedResult.wastageInGrams.toFixed(3)} grams)\n\n✨ *TOTAL AMOUNT: ${formatCurrency(selectedResult.total)}*\n\n📏 Per Gram Summary:\n• Effective cost per gram: ${formatCurrency(selectedResult.total / weight)}/gram\n• Pure silver per gram: ${formatCurrency(selectedResult.purityValue / weight)}/gram`;
+                    const shareText = `🏪 *NL JEWELLERS*\n\n🤍 *SILVER PRICE BREAKDOWN*\n\n📊 Item Details:\n• Silver Type: 999 (Pure Silver)\n• Total Weight: ${weight} grams\n• Purity: 100% Pure Silver\n• Pure Silver Weight: ${pureSilverWeight.toFixed(3)} grams\n\n💵 Rate Information:\n• Silver Rate (999/gram): ${formatCurrency(price)}\n• Effective Rate (999): ${formatCurrency(effectiveSilverRate)}/gram\n\n🧮 Price Calculation:\n1. Silver Value: ${formatCurrency(selectedResult.purityValue)}\n   (${weight} grams × ${formatCurrency(effectiveSilverRate)}/gram)\n\n2. Wastage Charges: ${formatCurrency(selectedResult.wastageValue)}\n   (Weight equivalent: ${selectedResult.wastageInGrams.toFixed(3)} grams)\n\n✨ *TOTAL AMOUNT: ${formatCurrency(selectedResult.total)}*\n\n📏 Per Gram Summary:\n• Effective cost per gram: ${formatCurrency(selectedResult.total / weight)}/gram\n• Pure silver per gram: ${formatCurrency(selectedResult.purityValue / weight)}/gram`;
 
                     if (navigator.share) {
                         try {
@@ -408,7 +396,7 @@ const SilverCalculator: React.FC = () => {
                                         <div className="space-y-2 text-base">
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Silver Type:</span>
-                                                <span className="font-semibold text-text-main">{purity} ({purity === '925' ? 'Sterling Silver' : 'Pure Silver'})</span>
+                                                <span className="font-semibold text-text-main">999 (Pure Silver)</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Total Weight:</span>
