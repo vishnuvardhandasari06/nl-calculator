@@ -379,14 +379,15 @@ const SilverCalculator: React.FC = () => {
                     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowCustomerView(false)}>
                         <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                             {/* NL Jewellers Branding Header */}
-                            <div className="bg-gradient-to-r from-gray-700 to-gray-500 p-6 rounded-t-xl">
-                                <h1 className="text-3xl font-serif font-bold text-white text-center tracking-wide">NL JEWELLERS</h1>
+                            <div className="rounded-t-xl p-6" style={{ background: 'linear-gradient(to right, #800000, #990000)' }}>
+                                <h1 className="text-3xl font-serif font-bold text-center tracking-wide mb-1" style={{ color: '#D4AF37', textShadow: '1px 1px 3px rgba(0,0,0,0.3)' }}>NL JEWELLERS</h1>
+                                <p className="text-lg text-center" style={{ color: 'rgba(255, 248, 231, 0.8)' }}>Silver</p>
                             </div>
 
                             <div className="p-6">
-                                <div className="flex justify-between items-center mb-6">
+                                <div className="mb-6">
                                     <h2
-                                        className="text-2xl font-serif font-bold text-gray-700 cursor-pointer select-none"
+                                        className="text-2xl font-serif font-bold text-gray-700 cursor-pointer select-none text-center"
                                         onClick={() => {
                                             const newCount = closeClickCount + 1;
                                             setCloseClickCount(newCount);
@@ -398,14 +399,6 @@ const SilverCalculator: React.FC = () => {
                                     >
                                         💰 Price Breakdown {closeClickCount > 0 && `(${5 - closeClickCount} more)`}
                                     </h2>
-                                    <button onClick={() => {
-                                        setShowCustomerView(false);
-                                        setCloseClickCount(0);
-                                    }} className="text-text-main/60 hover:text-gray-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
                                 </div>
 
                                 <div className="space-y-4">
@@ -505,24 +498,15 @@ const SilverCalculator: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3 mt-6">
+                                <div className="mt-6">
                                     <button
                                         onClick={handleShare}
-                                        className="flex-1 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                        className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                         </svg>
                                         Share
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowCustomerView(false);
-                                            setCloseClickCount(0);
-                                        }}
-                                        className="flex-1 bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                                    >
-                                        Close
                                     </button>
                                 </div>
                             </div>
