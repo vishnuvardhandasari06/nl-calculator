@@ -60,6 +60,7 @@ const GoldCalculator: React.FC = () => {
     const [selectedResult, setSelectedResult] = useState<ResultDetail | null>(null);
     const [showProfitMargin, setShowProfitMargin] = useState(false); // Default: hidden
     const [showCustomerView, setShowCustomerView] = useState(false); // Customer view modal
+    const [closeClickCount, setCloseClickCount] = useState(0); // Counter for 5-tap close
 
     const [savedCalculations, setSavedCalculations] = useLocalStorage<CalculationParams[]>('goldCalculatorSaves', []);
     const [loadRequest, setLoadRequest] = useState<CalculationParams | null>(null);
@@ -298,7 +299,10 @@ const GoldCalculator: React.FC = () => {
                             </div>
                         </div>
                         <button
-                            onClick={() => setShowCustomerView(true)}
+                            onClick={() => {
+                                setShowCustomerView(true);
+                                setCloseClickCount(0); // Reset counter when opening
+                            }}
                             className="mt-4 w-full bg-accent-maroon text-white font-bold py-4 md:py-3 px-4 rounded-lg hover:bg-accent-maroon/90 transition-colors flex items-center justify-center gap-2 text-xl md:text-lg"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,121 +351,183 @@ const GoldCalculator: React.FC = () => {
                 const effectiveGoldRate = price * purityDecimal;
                 const pureGoldWeight = weight * purityDecimal;
 
+                const handleShare = async () => {
+                    const shareText = `🏪 *NL JEWELLERS*\n\n💰 *GOLD PRICE BREAKDOWN*\n\n📊 Item Details:\n• Gold Type: ${purity} (${purity === '916' ? '22 Karat' : '18 Karat'})\n• Total Weight: ${weight} grams\n• Purity: ${purityPercentage} Pure Gold\n• Pure Gold Weight: ${pureGoldWeight.toFixed(3)} grams\n\n💵 Rate Information:\n• Gold Rate (24K/gram): ${formatCurrency(price)}\n• Effective Rate (${purity}): ${formatCurrency(effectiveGoldRate)}/gram\n\n🧮 Price Calculation:\n1. Gold Value: ${formatCurrency(selectedResult.purityValue)}\n   (${weight} grams × ${formatCurrency(effectiveGoldRate)}/gram)\n\n2. Wastage Charges: ${formatCurrency(selectedResult.wastageValue)}\n   (Weight equivalent: ${selectedResult.wastageInGrams.toFixed(3)} grams)\n\n✨ *TOTAL AMOUNT: ${formatCurrency(selectedResult.total)}*\n\n📏 Per Gram Summary:\n• Effective cost per gram: ${formatCurrency(selectedResult.total / weight)}/gram\n• Pure gold per gram: ${formatCurrency(selectedResult.purityValue / weight)}/gram`;
+
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: 'NL Jewellers - Gold Price Breakdown',
+                                text: shareText,
+                            });
+                        } catch (err) {
+                            if ((err as Error).name !== 'AbortError') {
+                                console.error('Error sharing:', err);
+                            }
+                        }
+                    } else {
+                        // Fallback: Copy to clipboard
+                        try {
+                            await navigator.clipboard.writeText(shareText);
+                            alert('Price breakdown copied to clipboard!');
+                        } catch (err) {
+                            console.error('Error copying to clipboard:', err);
+                            alert('Unable to share. Please try again.');
+                        }
+                    }
+                };
+
                 return (
                     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowCustomerView(false)}>
-                        <div className="bg-ivory rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-serif font-bold text-accent-maroon">💰 Price Breakdown</h2>
-                                <button onClick={() => setShowCustomerView(false)} className="text-text-main/60 hover:text-accent-maroon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                        <div className="bg-ivory rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                            {/* NL Jewellers Branding Header */}
+                            <div className="bg-gradient-to-r from-accent-maroon to-primary-gold p-6 rounded-t-xl">
+                                <h1 className="text-3xl font-serif font-bold text-white text-center tracking-wide">NL JEWELLERS</h1>
                             </div>
 
-                            <div className="space-y-4">
-                                {/* Basic Details */}
-                                <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                    <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">📊 Item Details</h3>
-                                    <div className="space-y-2 text-base">
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Gold Type:</span>
-                                            <span className="font-semibold text-text-main">{purity} ({purity === '916' ? '22 Karat' : '18 Karat'})</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Total Weight:</span>
-                                            <span className="font-semibold text-text-main">{weight} grams</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Purity:</span>
-                                            <span className="font-semibold text-text-main">{purityPercentage} Pure Gold</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Pure Gold Weight:</span>
-                                            <span className="font-semibold text-text-main">{pureGoldWeight.toFixed(3)} grams</span>
-                                        </div>
-                                    </div>
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2
+                                        className="text-2xl font-serif font-bold text-accent-maroon cursor-pointer select-none"
+                                        onClick={() => {
+                                            const newCount = closeClickCount + 1;
+                                            setCloseClickCount(newCount);
+                                            if (newCount >= 5) {
+                                                setShowCustomerView(false);
+                                                setCloseClickCount(0);
+                                            }
+                                        }}
+                                    >
+                                        💰 Price Breakdown {closeClickCount > 0 && `(${5 - closeClickCount} more)`}
+                                    </h2>
+                                    <button onClick={() => {
+                                        setShowCustomerView(false);
+                                        setCloseClickCount(0);
+                                    }} className="text-text-main/60 hover:text-accent-maroon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
 
-                                {/* Rate Information */}
-                                <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                    <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">💵 Rate Information</h3>
-                                    <div className="space-y-2 text-base">
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Gold Rate (24K/gram):</span>
-                                            <span className="font-semibold text-text-main">{formatCurrency(price)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Effective Rate ({purity}):</span>
-                                            <span className="font-semibold text-text-main">{formatCurrency(effectiveGoldRate)}/gram</span>
-                                        </div>
-                                        <div className="text-xs text-text-main/60 pl-4 italic">
-                                            ({formatCurrency(price)} × {purityPercentage})
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Detailed Calculation */}
-                                <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                    <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">🧮 Price Calculation</h3>
-                                    <div className="space-y-3 text-base">
-                                        {/* Gold Value */}
-                                        <div>
+                                <div className="space-y-4">
+                                    {/* Basic Details */}
+                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
+                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">📊 Item Details</h3>
+                                        <div className="space-y-2 text-base">
                                             <div className="flex justify-between">
-                                                <span className="text-text-main/70 font-medium">1. Gold Value:</span>
-                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
+                                                <span className="text-text-main/70">Gold Type:</span>
+                                                <span className="font-semibold text-text-main">{purity} ({purity === '916' ? '22 Karat' : '18 Karat'})</span>
                                             </div>
-                                            <div className="text-sm text-text-main/60 pl-4 mt-1">
-                                                {weight} grams × {formatCurrency(effectiveGoldRate)}/gram
-                                            </div>
-                                        </div>
-
-                                        {/* Wastage Charges */}
-                                        <div className="pt-2 border-t border-primary-gold/20">
                                             <div className="flex justify-between">
-                                                <span className="text-text-main/70 font-medium">2. Wastage Charges:</span>
-                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
+                                                <span className="text-text-main/70">Total Weight:</span>
+                                                <span className="font-semibold text-text-main">{weight} grams</span>
                                             </div>
-                                            <div className="text-sm text-text-main/60 pl-4 mt-1">
-                                                Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Purity:</span>
+                                                <span className="font-semibold text-text-main">{purityPercentage} Pure Gold</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Pure Gold Weight:</span>
+                                                <span className="font-semibold text-text-main">{pureGoldWeight.toFixed(3)} grams</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Rate Information */}
+                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
+                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">💵 Rate Information</h3>
+                                        <div className="space-y-2 text-base">
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Gold Rate (24K/gram):</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(price)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Effective Rate ({purity}):</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(effectiveGoldRate)}/gram</span>
+                                            </div>
+                                            <div className="text-xs text-text-main/60 pl-4 italic">
+                                                ({formatCurrency(price)} × {purityPercentage})
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Detailed Calculation */}
+                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
+                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">🧮 Price Calculation</h3>
+                                        <div className="space-y-3 text-base">
+                                            {/* Gold Value */}
+                                            <div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-text-main/70 font-medium">1. Gold Value:</span>
+                                                    <span className="font-semibold text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
+                                                </div>
+                                                <div className="text-sm text-text-main/60 pl-4 mt-1">
+                                                    {weight} grams × {formatCurrency(effectiveGoldRate)}/gram
+                                                </div>
+                                            </div>
+
+                                            {/* Wastage Charges */}
+                                            <div className="pt-2 border-t border-primary-gold/20">
+                                                <div className="flex justify-between">
+                                                    <span className="text-text-main/70 font-medium">2. Wastage Charges:</span>
+                                                    <span className="font-semibold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
+                                                </div>
+                                                <div className="text-sm text-text-main/60 pl-4 mt-1">
+                                                    Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Total */}
+                                    <div className="bg-gradient-to-r from-primary-gold/30 to-primary-gold/20 p-5 rounded-lg border-2 border-primary-gold/50">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-bold text-xl text-accent-maroon">Total Amount:</span>
+                                            <span className="font-bold text-2xl text-accent-maroon">{formatCurrency(selectedResult.total)}</span>
+                                        </div>
+                                        <div className="text-sm text-text-main/70 text-center">
+                                            ({formatCurrency(selectedResult.purityValue)} + {formatCurrency(selectedResult.wastageValue)})
+                                        </div>
+                                    </div>
+
+                                    {/* Per Gram Summary */}
+                                    <div className="bg-white/50 p-4 rounded-lg border border-primary-gold/20">
+                                        <h4 className="font-semibold text-accent-maroon mb-2 text-center">📏 Per Gram Summary</h4>
+                                        <div className="text-sm space-y-1">
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Effective cost per gram:</span>
+                                                <span className="font-medium">{formatCurrency(selectedResult.total / weight)}/gram</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-main/70">Pure gold per gram:</span>
+                                                <span className="font-medium">{formatCurrency(selectedResult.purityValue / weight)}/gram</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Total */}
-                                <div className="bg-gradient-to-r from-primary-gold/30 to-primary-gold/20 p-5 rounded-lg border-2 border-primary-gold/50">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="font-bold text-xl text-accent-maroon">Total Amount:</span>
-                                        <span className="font-bold text-2xl text-accent-maroon">{formatCurrency(selectedResult.total)}</span>
-                                    </div>
-                                    <div className="text-sm text-text-main/70 text-center">
-                                        ({formatCurrency(selectedResult.purityValue)} + {formatCurrency(selectedResult.wastageValue)})
-                                    </div>
-                                </div>
-
-                                {/* Per Gram Summary */}
-                                <div className="bg-white/50 p-4 rounded-lg border border-primary-gold/20">
-                                    <h4 className="font-semibold text-accent-maroon mb-2 text-center">📏 Per Gram Summary</h4>
-                                    <div className="text-sm space-y-1">
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Effective cost per gram:</span>
-                                            <span className="font-medium">{formatCurrency(selectedResult.total / weight)}/gram</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-text-main/70">Pure gold per gram:</span>
-                                            <span className="font-medium">{formatCurrency(selectedResult.purityValue / weight)}/gram</span>
-                                        </div>
-                                    </div>
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={handleShare}
+                                        className="flex-1 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        Share
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowCustomerView(false);
+                                            setCloseClickCount(0);
+                                        }}
+                                        className="flex-1 bg-primary-gold text-text-main font-bold py-3 px-4 rounded-lg hover:bg-button-hover-gold transition-colors"
+                                    >
+                                        Close
+                                    </button>
                                 </div>
                             </div>
-
-                            <button
-                                onClick={() => setShowCustomerView(false)}
-                                className="mt-6 w-full bg-primary-gold text-text-main font-bold py-3 px-4 rounded-lg hover:bg-button-hover-gold transition-colors"
-                            >
-                                Close
-                            </button>
                         </div>
                     </div>
                 );
