@@ -376,7 +376,7 @@ const SilverCalculator: React.FC = () => {
                 };
 
                 return (
-                    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowCustomerView(false)}>
+                    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                             {/* NL Jewellers Branding Header */}
                             <div className="rounded-t-xl p-6" style={{ background: 'linear-gradient(to right, #800000, #990000)' }}>
@@ -397,7 +397,7 @@ const SilverCalculator: React.FC = () => {
                                             }
                                         }}
                                     >
-                                        💰 Price Breakdown {closeClickCount > 0 && `(${5 - closeClickCount} more)`}
+                                        💰 Price Breakdown
                                     </h2>
                                 </div>
 
