@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import jsPDF from 'jspdf';
+import { logoBase64 } from './logoBase64';
 
 interface BillData {
     metalType: 'gold' | 'silver';
@@ -157,38 +158,33 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.line(pageWidth - cornerOffset, pageHeight - cornerOffset, pageWidth - cornerOffset, pageHeight - cornerOffset - cornerSize);
 
             // ===== HEADER BAR =====
-            doc.setFillColor(128, 0, 0);
-            doc.rect(margin, margin, contentWidth, 42, 'F');
+            doc.setFillColor(15, 15, 15);
+            doc.rect(margin, margin, contentWidth, 55, 'F');
 
             // Gold inner border on header
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.8);
-            doc.rect(margin + 2, margin + 2, contentWidth - 4, 38, 'S');
+            doc.rect(margin + 2, margin + 2, contentWidth - 4, 51, 'S');
 
-            // Decorative gold line at top of header
-            doc.setFillColor(212, 175, 55);
-            doc.rect(margin, margin, contentWidth, 2, 'F');
+            // Logo
+            doc.addImage(logoBase64, 'JPEG', pageWidth / 2 - 15, margin + 5, 30, 30);
 
             // Shop name
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(32);
+            doc.setFontSize(16);
             doc.setTextColor(212, 175, 55);
-            doc.text('NL JEWELLERS', pageWidth / 2, margin + 22, { align: 'center' });
-
-            // Decorative separator dots
-            doc.setFontSize(10);
-            doc.text('✦  ✦  ✦', pageWidth / 2, margin + 29, { align: 'center' });
+            doc.text('NL JEWELLERS', pageWidth / 2, margin + 42, { align: 'center' });
 
             // Subtitle
-            doc.setFontSize(11);
+            doc.setFontSize(9);
             doc.setTextColor(255, 248, 231);
-            doc.text(`${metalName} Jewellery  |  ESTIMATE`, pageWidth / 2, margin + 37, { align: 'center' });
+            doc.text(`${metalName} Jewellery  |  ESTIMATE`, pageWidth / 2, margin + 48, { align: 'center' });
 
             // Gold accent bar below header
             doc.setFillColor(212, 175, 55);
-            doc.rect(margin, margin + 42, contentWidth, 2.5, 'F');
+            doc.rect(margin, margin + 55, contentWidth, 2.5, 'F');
 
-            y = margin + 52;
+            y = margin + 65;
 
             // ===== BILL INFO ROW =====
             doc.setFillColor(252, 249, 240);
@@ -340,7 +336,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             const valueX = pageWidth - margin - 5;
 
             // Calculate breakdown box height
-            let breakdownRows = 2; // metal value + wastage
+            let breakdownRows = 3; // metal value, wastage, total
             if (stonesCost > 0) breakdownRows++;
             if (discount > 0) breakdownRows++;
             const rowHeight = 9;
@@ -384,6 +380,13 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                 breakY += rowHeight;
             }
 
+            // Total (Before Discount)
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(34, 34, 34);
+            doc.text('Total Amount', labelX, breakY);
+            doc.text(formatCurrencyPlain(billData.purityValue + adjustedWastageValue + stonesCost), valueX, breakY, { align: 'right' });
+            breakY += rowHeight;
+
             // Discount (if any)
             if (discount > 0) {
                 doc.setFont('helvetica', 'normal');
@@ -413,7 +416,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(13);
             doc.setTextColor(212, 175, 55);
-            doc.text('TOTAL AMOUNT', margin + 6, y + 13);
+            doc.text('GRAND TOTAL', margin + 6, y + 13);
 
             doc.setFontSize(18);
             doc.setTextColor(255, 255, 255);
@@ -445,11 +448,6 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.line(margin + 20, y, pageWidth - margin - 20, y);
             doc.setLineWidth(0.3);
             doc.line(margin + 30, y + 2, pageWidth - margin - 30, y + 2);
-
-            // Diamond ornament in center
-            doc.setFontSize(8);
-            doc.setTextColor(212, 175, 55);
-            doc.text('◆', pageWidth / 2, y + 1, { align: 'center' });
 
             y += 8;
 
@@ -607,8 +605,14 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                                 </div>
                             </div>
 
+                            {/* Total Before Discount (Read Only) */}
+                            <div className="flex justify-between items-center px-3 py-2 border-t border-gray-100">
+                                <span className="text-sm font-bold text-gray-700">Total Amount</span>
+                                <span className="text-sm font-bold">{formatCurrency(billData.purityValue + adjustedWastageValue + stonesCost)}</span>
+                            </div>
+
                             {/* Discount */}
-                            <div className="flex justify-between items-center px-3 py-2 bg-green-50/50">
+                            <div className="flex justify-between items-center px-3 py-2 bg-green-50/50 border-t border-gray-100">
                                 <span className="text-sm text-green-700">Discount</span>
                                 <div className="relative">
                                     <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-green-400">₹</span>
@@ -626,7 +630,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                         {/* Total - Editable */}
                         <div className="px-3 py-3 flex justify-between items-center" style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColorLight})` }}>
                             <div>
-                                <span className="font-bold text-sm" style={{ color: '#D4AF37' }}>TOTAL</span>
+                                <span className="font-bold text-sm" style={{ color: '#D4AF37' }}>GRAND TOTAL</span>
                                 {totalManuallyEdited && (
                                     <button
                                         onClick={() => {
