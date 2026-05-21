@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { DeleteIcon } from './Icons';
+import BillGenerator from './BillGenerator';
 
 interface SilverCalculatorModalProps {
     isOpen: boolean;
@@ -60,6 +61,7 @@ const SilverCalculator: React.FC = () => {
     const [showProfitMargin, setShowProfitMargin] = useState(false); // Default: hidden
     const [showCustomerView, setShowCustomerView] = useState(false); // Customer view modal
     const [closeClickCount, setCloseClickCount] = useState(0); // Counter for 5-tap close
+    const [showBillGenerator, setShowBillGenerator] = useState(false); // Bill generator modal
 
     const [savedCalculations, setSavedCalculations] = useLocalStorage<SilverCalculationParams[]>('silverCalculatorSaves', []);
     const [loadRequest, setLoadRequest] = useState<SilverCalculationParams | null>(null);
@@ -364,6 +366,7 @@ const SilverCalculator: React.FC = () => {
                 };
 
                 return (
+                    <>
                     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                             {/* NL Jewellers Branding Header */}
@@ -486,7 +489,17 @@ const SilverCalculator: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-6">
+                                <div className="mt-6 space-y-3">
+                                    <button
+                                        onClick={() => setShowBillGenerator(true)}
+                                        className="w-full font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-white shadow-md"
+                                        style={{ background: 'linear-gradient(to right, #4a5568, #2d3748)' }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Generate Bill (PDF)
+                                    </button>
                                     <button
                                         onClick={handleShare}
                                         className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
@@ -494,12 +507,33 @@ const SilverCalculator: React.FC = () => {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                         </svg>
-                                        Share
+                                        Share as Text
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Bill Generator Modal */}
+                    <BillGenerator
+                        isOpen={showBillGenerator}
+                        onClose={() => setShowBillGenerator(false)}
+                        billData={{
+                            metalType: 'silver',
+                            purity: purity,
+                            purityLabel: purityPercentage,
+                            weight: weight,
+                            pricePerGram: price,
+                            purityValue: selectedResult.purityValue,
+                            wastageValue: selectedResult.wastageValue,
+                            wastageInGrams: selectedResult.wastageInGrams,
+                            wastagePercent: selectedResult.percent,
+                            total: selectedResult.total,
+                            effectiveRate: effectiveSilverRate,
+                            pureWeight: pureSilverWeight,
+                        }}
+                    />
+                    </>
                 );
             })()}
         </div>
