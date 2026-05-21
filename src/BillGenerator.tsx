@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import jsPDF from 'jspdf';
 
 interface BillData {
@@ -59,9 +59,61 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [itemDescription, setItemDescription] = useState('');
+    const [stonesCost, setStonesCost] = useState<number>(0);
+    const [discount, setDiscount] = useState<number>(0);
+    const [editedTotal, setEditedTotal] = useState<number>(0);
+    const [adjustedWastageValue, setAdjustedWastageValue] = useState<number>(0);
+    const [adjustedWastageGrams, setAdjustedWastageGrams] = useState<number>(0);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [totalManuallyEdited, setTotalManuallyEdited] = useState(false);
+
+    // Calculate the natural total based on current inputs
+    const calculateNaturalTotal = useCallback(() => {
+        return billData.purityValue + billData.wastageValue + stonesCost - discount;
+    }, [billData.purityValue, billData.wastageValue, stonesCost, discount]);
+
+    // Initialize/reset when bill data changes or modal opens
+    useEffect(() => {
+        if (isOpen) {
+            const naturalTotal = billData.purityValue + billData.wastageValue + stonesCost - discount;
+            setEditedTotal(Math.round(naturalTotal));
+            setAdjustedWastageValue(billData.wastageValue);
+            setAdjustedWastageGrams(billData.wastageInGrams);
+            setTotalManuallyEdited(false);
+        }
+    }, [isOpen, billData]);
+
+    // When stones cost or discount changes and total was NOT manually edited, recalculate total
+    useEffect(() => {
+        if (!totalManuallyEdited) {
+            const naturalTotal = calculateNaturalTotal();
+            setEditedTotal(Math.round(naturalTotal));
+            setAdjustedWastageValue(billData.wastageValue);
+            setAdjustedWastageGrams(billData.wastageInGrams);
+        }
+    }, [stonesCost, discount, totalManuallyEdited, calculateNaturalTotal, billData.wastageValue, billData.wastageInGrams]);
+
+    // When total is manually edited, adjust wastage to match
+    const handleTotalChange = (newTotal: number) => {
+        setEditedTotal(newTotal);
+        setTotalManuallyEdited(true);
+
+        // Total = purityValue + wastage + stonesCost - discount
+        // => wastage = Total - purityValue - stonesCost + discount
+        const newWastage = newTotal - billData.purityValue - stonesCost + discount;
+        setAdjustedWastageValue(Math.max(0, newWastage));
+        // Calculate wastage in grams based on per-gram rate
+        if (billData.pricePerGram > 0) {
+            setAdjustedWastageGrams(Math.max(0, newWastage / billData.pricePerGram));
+        }
+    };
 
     if (!isOpen) return null;
+
+    const metalName = billData.metalType === 'gold' ? 'Gold' : 'Silver';
+    const isGold = billData.metalType === 'gold';
+    const accentColor = isGold ? '#800000' : '#2d3748';
+    const accentColorLight = isGold ? '#990000' : '#4a5568';
 
     const generatePDF = async (action: 'download' | 'share') => {
         setIsGenerating(true);
@@ -74,43 +126,76 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             });
 
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 15;
             const contentWidth = pageWidth - margin * 2;
             let y = 0;
 
-            // ===== HEADER BAR =====
-            doc.setFillColor(128, 0, 0); // Maroon
-            doc.rect(0, 0, pageWidth, 38, 'F');
+            // ===== ROYAL OUTER BORDER =====
+            // Double border with gold accent
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(1.5);
+            doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
+            doc.setLineWidth(0.4);
+            doc.rect(8, 8, pageWidth - 16, pageHeight - 16, 'S');
 
-            // Gold accent line
-            doc.setFillColor(212, 175, 55); // Gold
-            doc.rect(0, 38, pageWidth, 1.5, 'F');
+            // Corner ornaments (small L-shapes in gold)
+            const cornerSize = 8;
+            const cornerOffset = 8;
+            doc.setLineWidth(1);
+            // Top-left
+            doc.line(cornerOffset, cornerOffset, cornerOffset + cornerSize, cornerOffset);
+            doc.line(cornerOffset, cornerOffset, cornerOffset, cornerOffset + cornerSize);
+            // Top-right
+            doc.line(pageWidth - cornerOffset, cornerOffset, pageWidth - cornerOffset - cornerSize, cornerOffset);
+            doc.line(pageWidth - cornerOffset, cornerOffset, pageWidth - cornerOffset, cornerOffset + cornerSize);
+            // Bottom-left
+            doc.line(cornerOffset, pageHeight - cornerOffset, cornerOffset + cornerSize, pageHeight - cornerOffset);
+            doc.line(cornerOffset, pageHeight - cornerOffset, cornerOffset, pageHeight - cornerOffset - cornerSize);
+            // Bottom-right
+            doc.line(pageWidth - cornerOffset, pageHeight - cornerOffset, pageWidth - cornerOffset - cornerSize, pageHeight - cornerOffset);
+            doc.line(pageWidth - cornerOffset, pageHeight - cornerOffset, pageWidth - cornerOffset, pageHeight - cornerOffset - cornerSize);
+
+            // ===== HEADER BAR =====
+            doc.setFillColor(128, 0, 0);
+            doc.rect(margin, margin, contentWidth, 42, 'F');
+
+            // Gold inner border on header
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.8);
+            doc.rect(margin + 2, margin + 2, contentWidth - 4, 38, 'S');
+
+            // Decorative gold line at top of header
+            doc.setFillColor(212, 175, 55);
+            doc.rect(margin, margin, contentWidth, 2, 'F');
 
             // Shop name
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(28);
-            doc.setTextColor(212, 175, 55); // Gold text
-            doc.text('NL JEWELLERS', pageWidth / 2, 18, { align: 'center' });
+            doc.setFontSize(32);
+            doc.setTextColor(212, 175, 55);
+            doc.text('NL JEWELLERS', pageWidth / 2, margin + 22, { align: 'center' });
+
+            // Decorative separator dots
+            doc.setFontSize(10);
+            doc.text('✦  ✦  ✦', pageWidth / 2, margin + 29, { align: 'center' });
 
             // Subtitle
             doc.setFontSize(11);
-            doc.setTextColor(255, 248, 231); // Ivory
-            const subtitle = billData.metalType === 'gold' ? 'Gold Jewellery' : 'Silver Jewellery';
-            doc.text(subtitle, pageWidth / 2, 27, { align: 'center' });
+            doc.setTextColor(255, 248, 231);
+            doc.text(`${metalName} Jewellery  |  ESTIMATE`, pageWidth / 2, margin + 37, { align: 'center' });
 
-            // "ESTIMATE" label
-            doc.setFontSize(9);
-            doc.setTextColor(212, 175, 55);
-            doc.text('ESTIMATE', pageWidth / 2, 34, { align: 'center' });
+            // Gold accent bar below header
+            doc.setFillColor(212, 175, 55);
+            doc.rect(margin, margin + 42, contentWidth, 2.5, 'F');
 
-            y = 47;
+            y = margin + 52;
 
             // ===== BILL INFO ROW =====
-            doc.setFillColor(252, 249, 240); // Light ivory bg
-            doc.rect(margin, y - 4, contentWidth, 14, 'F');
+            doc.setFillColor(252, 249, 240);
+            doc.rect(margin, y, contentWidth, 12, 'F');
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.3);
-            doc.rect(margin, y - 4, contentWidth, 14, 'S');
+            doc.rect(margin, y, contentWidth, 12, 'S');
 
             const billNo = generateBillNumber();
             const dateStr = formatDate();
@@ -118,71 +203,83 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(128, 0, 0);
-            doc.text('Bill No:', margin + 3, y + 1);
+            doc.text('Bill No:', margin + 4, y + 7);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(34, 34, 34);
-            doc.text(billNo, margin + 20, y + 1);
+            doc.text(billNo, margin + 22, y + 7);
 
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(128, 0, 0);
-            doc.text('Date:', pageWidth - margin - 45, y + 1);
+            doc.text('Date:', pageWidth - margin - 48, y + 7);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(34, 34, 34);
-            doc.text(dateStr, pageWidth - margin - 33, y + 1);
+            doc.text(dateStr, pageWidth - margin - 36, y + 7);
 
             y += 18;
 
             // ===== CUSTOMER DETAILS =====
-            // Section header
+            // Ornamental section header
             doc.setFillColor(128, 0, 0);
-            doc.rect(margin, y, contentWidth, 7, 'F');
+            doc.rect(margin, y, contentWidth, 8, 'F');
+            doc.setFillColor(212, 175, 55);
+            doc.rect(margin, y, 3, 8, 'F'); // gold left accent
+            doc.rect(margin + contentWidth - 3, y, 3, 8, 'F'); // gold right accent
+
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(255, 255, 255);
-            doc.text('CUSTOMER DETAILS', margin + 3, y + 5);
+            doc.text('CUSTOMER DETAILS', pageWidth / 2, y + 5.5, { align: 'center' });
             y += 10;
 
+            const customerBoxHeight = (customerName && customerPhone) ? 18 : (customerName || customerPhone) ? 12 : 10;
             doc.setFillColor(255, 255, 255);
-            doc.rect(margin, y, contentWidth, customerName || customerPhone ? 18 : 12, 'F');
+            doc.rect(margin, y, contentWidth, customerBoxHeight, 'F');
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.2);
-            doc.rect(margin, y, contentWidth, customerName || customerPhone ? 18 : 12, 'S');
+            doc.rect(margin, y, contentWidth, customerBoxHeight, 'S');
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor(34, 34, 34);
 
+            let custY = y + 7;
             if (customerName) {
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(128, 0, 0);
-                doc.text('Name:', margin + 3, y + 6);
+                doc.text('Name:', margin + 4, custY);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(34, 34, 34);
-                doc.text(customerName, margin + 22, y + 6);
+                doc.text(customerName, margin + 22, custY);
+                custY += 8;
             }
             if (customerPhone) {
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(128, 0, 0);
-                doc.text('Phone:', margin + 3, y + 13);
+                doc.text('Phone:', margin + 4, custY);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(34, 34, 34);
-                doc.text(customerPhone, margin + 22, y + 13);
+                doc.text(customerPhone, margin + 22, custY);
             }
             if (!customerName && !customerPhone) {
                 doc.setTextColor(150, 150, 150);
-                doc.text('Walk-in Customer', margin + 3, y + 7);
+                doc.setFont('helvetica', 'italic');
+                doc.text('Walk-in Customer', margin + 4, y + 7);
             }
 
-            y += (customerName || customerPhone ? 18 : 12) + 6;
+            y += customerBoxHeight + 6;
 
             // ===== ITEM DETAILS TABLE =====
             doc.setFillColor(128, 0, 0);
-            doc.rect(margin, y, contentWidth, 7, 'F');
+            doc.rect(margin, y, contentWidth, 8, 'F');
+            doc.setFillColor(212, 175, 55);
+            doc.rect(margin, y, 3, 8, 'F');
+            doc.rect(margin + contentWidth - 3, y, 3, 8, 'F');
+
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(255, 255, 255);
-            doc.text('ITEM DETAILS', margin + 3, y + 5);
-            y += 9;
+            doc.text('ITEM DETAILS', pageWidth / 2, y + 5.5, { align: 'center' });
+            y += 10;
 
             // Table header
             const col1 = margin;
@@ -200,10 +297,10 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(128, 0, 0);
-            doc.text('Item', col1 + 3, y + 6.5);
-            doc.text('Weight', col2 + 3, y + 6.5);
-            doc.text('Purity', col3 + 3, y + 6.5);
-            doc.text('Rate /gm', col4 + 3, y + 6.5);
+            doc.text('Item', col1 + 4, y + 6.5);
+            doc.text('Weight', col2 + 4, y + 6.5);
+            doc.text('Purity', col3 + 4, y + 6.5);
+            doc.text('Rate /gm', col4 + 4, y + 6.5);
             y += tableHeight;
 
             // Table row
@@ -216,85 +313,113 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setFontSize(10);
             doc.setTextColor(34, 34, 34);
 
-            const metalLabel = billData.metalType === 'gold'
-                ? `Gold ${billData.purity}`
-                : `Silver ${billData.purity}`;
+            const metalLabel = `${metalName} ${billData.purity}`;
             const itemLabel = itemDescription || metalLabel;
 
-            doc.text(itemLabel.length > 20 ? itemLabel.substring(0, 20) + '...' : itemLabel, col1 + 3, y + 7);
-            doc.text(`${billData.weight} gm`, col2 + 3, y + 7);
-            doc.text(billData.purityLabel, col3 + 3, y + 7);
-            doc.text(formatCurrencyPlain(billData.pricePerGram), col4 + 3, y + 7);
+            doc.text(itemLabel.length > 20 ? itemLabel.substring(0, 20) + '...' : itemLabel, col1 + 4, y + 7);
+            doc.text(`${billData.weight} gm`, col2 + 4, y + 7);
+            doc.text(billData.purityLabel, col3 + 4, y + 7);
+            doc.text(formatCurrencyPlain(billData.pricePerGram), col4 + 4, y + 7);
 
             y += tableHeight + 8;
 
             // ===== PRICE BREAKDOWN =====
             doc.setFillColor(128, 0, 0);
-            doc.rect(margin, y, contentWidth, 7, 'F');
+            doc.rect(margin, y, contentWidth, 8, 'F');
+            doc.setFillColor(212, 175, 55);
+            doc.rect(margin, y, 3, 8, 'F');
+            doc.rect(margin + contentWidth - 3, y, 3, 8, 'F');
+
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(255, 255, 255);
-            doc.text('PRICE BREAKDOWN', margin + 3, y + 5);
+            doc.text('PRICE BREAKDOWN', pageWidth / 2, y + 5.5, { align: 'center' });
             y += 10;
-
-            // Breakdown rows
-            doc.setFillColor(255, 255, 255);
-            doc.rect(margin, y, contentWidth, 42, 'F');
-            doc.setDrawColor(212, 175, 55);
-            doc.setLineWidth(0.2);
-            doc.rect(margin, y, contentWidth, 42, 'S');
 
             const labelX = margin + 5;
             const valueX = pageWidth - margin - 5;
 
-            // Gold/Silver Value
+            // Calculate breakdown box height
+            let breakdownRows = 2; // metal value + wastage
+            if (stonesCost > 0) breakdownRows++;
+            if (discount > 0) breakdownRows++;
+            const rowHeight = 9;
+            const breakdownHeight = breakdownRows * rowHeight + 10; // +10 for padding
+
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, y, contentWidth, breakdownHeight, 'F');
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.2);
+            doc.rect(margin, y, contentWidth, breakdownHeight, 'S');
+
+            let breakY = y + 7;
+
+            // Metal Value
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor(80, 80, 80);
-            const metalName = billData.metalType === 'gold' ? 'Gold' : 'Silver';
-            doc.text(`${metalName} Value (${billData.weight}gm × ${billData.purityLabel})`, labelX, y + 7);
+            doc.text(`${metalName} Value (${billData.weight}gm × ${billData.purityLabel})`, labelX, breakY);
             doc.setTextColor(34, 34, 34);
             doc.setFont('helvetica', 'bold');
-            doc.text(formatCurrencyPlain(billData.purityValue), valueX, y + 7, { align: 'right' });
+            doc.text(formatCurrencyPlain(billData.purityValue), valueX, breakY, { align: 'right' });
+            breakY += rowHeight;
 
             // Wastage
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(80, 80, 80);
-            doc.text(`Wastage Charges (${billData.wastageInGrams.toFixed(3)} gm)`, labelX, y + 16);
+            doc.text(`Wastage Charges (${adjustedWastageGrams.toFixed(3)} gm)`, labelX, breakY);
             doc.setTextColor(34, 34, 34);
             doc.setFont('helvetica', 'bold');
-            doc.text(formatCurrencyPlain(billData.wastageValue), valueX, y + 16, { align: 'right' });
+            doc.text(formatCurrencyPlain(adjustedWastageValue), valueX, breakY, { align: 'right' });
+            breakY += rowHeight;
 
-            // Divider line
-            doc.setDrawColor(212, 175, 55);
-            doc.setLineWidth(0.5);
-            doc.line(labelX, y + 22, valueX, y + 22);
+            // Stones cost (if any)
+            if (stonesCost > 0) {
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(80, 80, 80);
+                doc.text('Stones / Additional Cost', labelX, breakY);
+                doc.setTextColor(34, 34, 34);
+                doc.setFont('helvetica', 'bold');
+                doc.text(formatCurrencyPlain(stonesCost), valueX, breakY, { align: 'right' });
+                breakY += rowHeight;
+            }
 
-            // Subtotal
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`(${formatCurrencyPlain(billData.purityValue)} + ${formatCurrencyPlain(billData.wastageValue)})`, labelX, y + 29);
+            // Discount (if any)
+            if (discount > 0) {
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 128, 0);
+                doc.text('Discount', labelX, breakY);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`- ${formatCurrencyPlain(discount)}`, valueX, breakY, { align: 'right' });
+                breakY += rowHeight;
+            }
 
-            // Per gram
-            doc.text(`Effective cost: ${formatCurrencyPlain(billData.total / billData.weight)}/gram`, labelX, y + 36);
-
-            y += 48;
+            y += breakdownHeight + 4;
 
             // ===== TOTAL AMOUNT BOX =====
+            // Gold border around total
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(1);
+            doc.rect(margin - 1, y - 1, contentWidth + 2, 22, 'S');
+
             doc.setFillColor(128, 0, 0);
-            doc.roundedRect(margin, y, contentWidth, 18, 2, 2, 'F');
+            doc.roundedRect(margin, y, contentWidth, 20, 2, 2, 'F');
+
+            // Inner gold border
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.rect(margin + 1.5, y + 1.5, contentWidth - 3, 17, 'S');
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(13);
             doc.setTextColor(212, 175, 55);
-            doc.text('TOTAL AMOUNT', margin + 5, y + 12);
+            doc.text('TOTAL AMOUNT', margin + 6, y + 13);
 
-            doc.setFontSize(16);
+            doc.setFontSize(18);
             doc.setTextColor(255, 255, 255);
-            doc.text(formatCurrencyPlain(billData.total), valueX, y + 12, { align: 'right' });
+            doc.text(formatCurrencyPlain(editedTotal), valueX - 2, y + 14, { align: 'right' });
 
-            y += 26;
+            y += 28;
 
             // ===== ADDITIONAL INFO =====
             doc.setFillColor(252, 249, 240);
@@ -314,13 +439,22 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             y += 28;
 
             // ===== FOOTER =====
-            // Gold line
-            doc.setFillColor(212, 175, 55);
-            doc.rect(margin, y, contentWidth, 1, 'F');
-            y += 5;
+            // Ornamental gold divider
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.8);
+            doc.line(margin + 20, y, pageWidth - margin - 20, y);
+            doc.setLineWidth(0.3);
+            doc.line(margin + 30, y + 2, pageWidth - margin - 30, y + 2);
+
+            // Diamond ornament in center
+            doc.setFontSize(8);
+            doc.setTextColor(212, 175, 55);
+            doc.text('◆', pageWidth / 2, y + 1, { align: 'center' });
+
+            y += 8;
 
             doc.setFont('helvetica', 'italic');
-            doc.setFontSize(11);
+            doc.setFontSize(12);
             doc.setTextColor(128, 0, 0);
             doc.text('Thank you for choosing NL Jewellers!', pageWidth / 2, y + 4, { align: 'center' });
 
@@ -329,17 +463,16 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setTextColor(150, 150, 150);
             doc.text('This is a computer generated estimate.', pageWidth / 2, y + 12, { align: 'center' });
 
-            // Bottom gold border
+            // Bottom ornamental border
             doc.setFillColor(212, 175, 55);
-            doc.rect(0, doc.internal.pageSize.getHeight() - 3, pageWidth, 3, 'F');
+            doc.rect(5, pageHeight - 8, pageWidth - 10, 1.5, 'F');
             doc.setFillColor(128, 0, 0);
-            doc.rect(0, doc.internal.pageSize.getHeight() - 1.5, pageWidth, 1.5, 'F');
+            doc.rect(5, pageHeight - 6, pageWidth - 10, 1, 'F');
 
             // === Action ===
             const fileName = `NL_Jewellers_${billNo}.pdf`;
 
             if (action === 'share') {
-                // Try Web Share API with file
                 const pdfBlob = doc.output('blob');
                 const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
@@ -347,17 +480,15 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                     try {
                         await navigator.share({
                             title: `NL Jewellers - ${metalName} Estimate`,
-                            text: `${metalName} jewellery estimate from NL Jewellers - Total: ${formatCurrency(billData.total)}`,
+                            text: `${metalName} jewellery estimate from NL Jewellers - Total: ${formatCurrency(editedTotal)}`,
                             files: [file],
                         });
                     } catch (err) {
                         if ((err as Error).name !== 'AbortError') {
-                            // Fallback to download
                             doc.save(fileName);
                         }
                     }
                 } else {
-                    // Fallback: direct download
                     doc.save(fileName);
                 }
             } else {
@@ -372,105 +503,172 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4"
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-3"
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[92vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
+                style={{ scrollbarWidth: 'thin' }}
             >
                 {/* Header */}
-                <div className="rounded-t-xl p-5" style={{ background: 'linear-gradient(to right, #800000, #990000)' }}>
-                    <h2 className="text-2xl font-serif font-bold text-center tracking-wide"
+                <div className="rounded-t-2xl p-4 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColorLight})` }}>
+                    {/* Subtle pattern overlay */}
+                    <div className="absolute inset-0 opacity-10" style={{
+                        backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(212,175,55,0.3) 1px, transparent 1px)',
+                        backgroundSize: '20px 20px'
+                    }} />
+                    <h2 className="text-xl font-serif font-bold text-center tracking-wide relative"
                         style={{ color: '#D4AF37', textShadow: '1px 1px 3px rgba(0,0,0,0.3)' }}>
                         Generate Bill
                     </h2>
-                    <p className="text-sm text-center mt-1" style={{ color: 'rgba(255, 248, 231, 0.8)' }}>
-                        {billData.metalType === 'gold' ? 'Gold' : 'Silver'} Jewellery Estimate
+                    <p className="text-xs text-center mt-0.5 relative" style={{ color: 'rgba(255, 248, 231, 0.8)' }}>
+                        {metalName} Jewellery Estimate
                     </p>
                 </div>
 
-                <div className="p-5 space-y-4">
-                    {/* Customer Name */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Customer Name <span className="text-gray-400 font-normal">(optional)</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            placeholder="Enter customer name"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base"
-                        />
+                <div className="p-4 space-y-3">
+                    {/* Customer Details - Compact Grid */}
+                    <div className="space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>
+                            Customer Details
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            <input
+                                type="text"
+                                value={customerName}
+                                onChange={(e) => setCustomerName(e.target.value)}
+                                placeholder="Customer Name"
+                                className="col-span-2 px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm bg-gray-50 focus:bg-white transition-colors"
+                                style={{ ['--tw-ring-color' as string]: '#D4AF37' } as React.CSSProperties}
+                            />
+                            <input
+                                type="tel"
+                                value={customerPhone}
+                                onChange={(e) => setCustomerPhone(e.target.value)}
+                                placeholder="Phone Number"
+                                className="px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm bg-gray-50 focus:bg-white transition-colors"
+                            />
+                            <input
+                                type="text"
+                                value={itemDescription}
+                                onChange={(e) => setItemDescription(e.target.value)}
+                                placeholder={isGold ? 'e.g., Chain, Ring' : 'e.g., Bangle, Anklet'}
+                                className="px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm bg-gray-50 focus:bg-white transition-colors"
+                            />
+                        </div>
                     </div>
 
-                    {/* Customer Phone */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Phone Number <span className="text-gray-400 font-normal">(optional)</span>
-                        </label>
-                        <input
-                            type="tel"
-                            value={customerPhone}
-                            onChange={(e) => setCustomerPhone(e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base"
-                        />
+                    {/* Divider */}
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 h-px" style={{ backgroundColor: '#D4AF37', opacity: 0.3 }} />
+                        <span className="text-xs" style={{ color: '#D4AF37' }}>◆</span>
+                        <div className="flex-1 h-px" style={{ backgroundColor: '#D4AF37', opacity: 0.3 }} />
                     </div>
 
-                    {/* Item Description */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Item Description <span className="text-gray-400 font-normal">(optional)</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={itemDescription}
-                            onChange={(e) => setItemDescription(e.target.value)}
-                            placeholder={billData.metalType === 'gold' ? 'e.g., Gold Chain, Ring' : 'e.g., Silver Bangle, Anklet'}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-base"
-                        />
-                    </div>
+                    {/* Price Breakdown - Compact */}
+                    <div className="rounded-lg border overflow-hidden" style={{ borderColor: 'rgba(212,175,55,0.3)' }}>
+                        {/* Section header */}
+                        <div className="px-3 py-1.5 flex items-center justify-between" style={{ backgroundColor: 'rgba(128,0,0,0.05)' }}>
+                            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: accentColor }}>
+                                Price Breakdown
+                            </h3>
+                            <span className="text-xs text-gray-400">{metalName} {billData.purity}</span>
+                        </div>
 
-                    {/* Summary Preview */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Bill Preview</h3>
-                        <div className="space-y-1.5 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Item:</span>
-                                <span className="font-medium">{billData.metalType === 'gold' ? `Gold ${billData.purity}` : `Silver ${billData.purity}`}</span>
+                        <div className="divide-y divide-gray-100">
+                            {/* Metal Value */}
+                            <div className="flex justify-between items-center px-3 py-2">
+                                <span className="text-sm text-gray-600">{metalName} Value</span>
+                                <span className="text-sm font-semibold">{formatCurrency(billData.purityValue)}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Weight:</span>
-                                <span className="font-medium">{billData.weight} grams</span>
+
+                            {/* Wastage */}
+                            <div className="flex justify-between items-center px-3 py-2">
+                                <span className="text-sm text-gray-600">
+                                    Wastage
+                                    <span className="text-xs text-gray-400 ml-1">({adjustedWastageGrams.toFixed(3)}gm)</span>
+                                </span>
+                                <span className="text-sm font-semibold">{formatCurrency(adjustedWastageValue)}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Purity:</span>
-                                <span className="font-medium">{billData.purityLabel}</span>
+
+                            {/* Stones Cost */}
+                            <div className="flex justify-between items-center px-3 py-2 bg-amber-50/50">
+                                <span className="text-sm text-gray-600">Stones / Extra</span>
+                                <div className="relative">
+                                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                                    <input
+                                        type="number"
+                                        value={stonesCost || ''}
+                                        onChange={(e) => setStonesCost(Number(e.target.value) || 0)}
+                                        placeholder="0"
+                                        className="w-28 pl-6 pr-2 py-1.5 text-right text-sm font-semibold border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 bg-white"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex justify-between border-t border-gray-200 pt-1.5 mt-1.5">
-                                <span className="text-gray-600">{billData.metalType === 'gold' ? 'Gold' : 'Silver'} Value:</span>
-                                <span className="font-medium">{formatCurrency(billData.purityValue)}</span>
+
+                            {/* Discount */}
+                            <div className="flex justify-between items-center px-3 py-2 bg-green-50/50">
+                                <span className="text-sm text-green-700">Discount</span>
+                                <div className="relative">
+                                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-green-400">₹</span>
+                                    <input
+                                        type="number"
+                                        value={discount || ''}
+                                        onChange={(e) => setDiscount(Number(e.target.value) || 0)}
+                                        placeholder="0"
+                                        className="w-28 pl-6 pr-2 py-1.5 text-right text-sm font-semibold border border-green-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400 bg-white text-green-700"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Wastage ({billData.wastageInGrams.toFixed(3)}gm):</span>
-                                <span className="font-medium">{formatCurrency(billData.wastageValue)}</span>
+                        </div>
+
+                        {/* Total - Editable */}
+                        <div className="px-3 py-3 flex justify-between items-center" style={{ background: `linear-gradient(to right, ${accentColor}, ${accentColorLight})` }}>
+                            <div>
+                                <span className="font-bold text-sm" style={{ color: '#D4AF37' }}>TOTAL</span>
+                                {totalManuallyEdited && (
+                                    <button
+                                        onClick={() => {
+                                            setTotalManuallyEdited(false);
+                                            const naturalTotal = calculateNaturalTotal();
+                                            setEditedTotal(Math.round(naturalTotal));
+                                            setAdjustedWastageValue(billData.wastageValue);
+                                            setAdjustedWastageGrams(billData.wastageInGrams);
+                                        }}
+                                        className="ml-2 text-xs underline opacity-70 hover:opacity-100 transition-opacity"
+                                        style={{ color: '#D4AF37' }}
+                                    >
+                                        reset
+                                    </button>
+                                )}
                             </div>
-                            <div className="flex justify-between border-t-2 border-amber-300 pt-2 mt-2">
-                                <span className="font-bold text-base" style={{ color: '#800000' }}>Total:</span>
-                                <span className="font-bold text-base" style={{ color: '#800000' }}>{formatCurrency(billData.total)}</span>
+                            <div className="relative">
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold text-white/70">₹</span>
+                                <input
+                                    type="number"
+                                    value={editedTotal || ''}
+                                    onChange={(e) => handleTotalChange(Number(e.target.value) || 0)}
+                                    className="w-36 pl-6 pr-2 py-2 text-right text-lg font-bold rounded-md border-2 border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-white/10 text-white"
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                                />
                             </div>
                         </div>
                     </div>
 
+                    {totalManuallyEdited && (
+                        <p className="text-xs text-center text-amber-600 -mt-1">
+                            ⚡ Wastage auto-adjusted to match your total
+                        </p>
+                    )}
+
                     {/* Action Buttons */}
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex gap-2 pt-1">
                         <button
                             onClick={() => generatePDF('download')}
                             disabled={isGenerating}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-bold text-white transition-all disabled:opacity-50"
-                            style={{ background: 'linear-gradient(to right, #800000, #990000)' }}
+                            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-white transition-all disabled:opacity-50 shadow-md active:scale-95"
+                            style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColorLight})` }}
                         >
                             {isGenerating ? (
                                 <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -484,7 +682,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                         <button
                             onClick={() => generatePDF('share')}
                             disabled={isGenerating}
-                            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 py-3 px-4 rounded-lg font-bold text-white transition-colors disabled:opacity-50"
+                            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 py-3 px-4 rounded-xl font-bold text-white transition-colors disabled:opacity-50 shadow-md active:scale-95"
                         >
                             {isGenerating ? (
                                 <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -500,7 +698,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                     {/* Cancel */}
                     <button
                         onClick={onClose}
-                        className="w-full py-2.5 text-gray-500 hover:text-gray-700 font-medium transition-colors text-sm"
+                        className="w-full py-2 text-gray-400 hover:text-gray-600 font-medium transition-colors text-sm"
                     >
                         Cancel
                     </button>
