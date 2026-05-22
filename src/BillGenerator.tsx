@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import jsPDF from 'jspdf';
-import { logoBase64 } from './logoBase64';
 
 interface BillData {
     metalType: 'gold' | 'silver';
@@ -158,7 +157,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.line(pageWidth - cornerOffset, pageHeight - cornerOffset, pageWidth - cornerOffset, pageHeight - cornerOffset - cornerSize);
 
             // ===== HEADER BAR =====
-            doc.setFillColor(15, 15, 15);
+            doc.setFillColor(128, 0, 0);
             doc.rect(margin, margin, contentWidth, 55, 'F');
 
             // Gold inner border on header
@@ -166,19 +165,22 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setLineWidth(0.8);
             doc.rect(margin + 2, margin + 2, contentWidth - 4, 51, 'S');
 
-            // Logo
-            doc.addImage(logoBase64, 'JPEG', pageWidth / 2 - 15, margin + 5, 30, 30);
-
             // Shop name
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
+            doc.setFontSize(22);
             doc.setTextColor(212, 175, 55);
-            doc.text('NL JEWELLERS', pageWidth / 2, margin + 42, { align: 'center' });
+            doc.text('NL JEWELLERS', pageWidth / 2, margin + 18, { align: 'center' });
 
             // Subtitle
-            doc.setFontSize(9);
+            doc.setFontSize(10);
             doc.setTextColor(255, 248, 231);
-            doc.text(`${metalName} Jewellery  |  ESTIMATE`, pageWidth / 2, margin + 48, { align: 'center' });
+            doc.text(`${metalName} Jewellery  |  ESTIMATE`, pageWidth / 2, margin + 27, { align: 'center' });
+
+            // Phone numbers (Store contact)
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9.5);
+            doc.setTextColor(255, 248, 231);
+            doc.text('Dasari Srinivas: 9849520054  |  Dasari Vishnu: 9133007654', pageWidth / 2, margin + 37, { align: 'center' });
 
             // Gold accent bar below header
             doc.setFillColor(212, 175, 55);
@@ -201,14 +203,14 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setTextColor(128, 0, 0);
             doc.text('Bill No:', margin + 4, y + 7);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
             doc.text(billNo, margin + 22, y + 7);
 
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(128, 0, 0);
             doc.text('Date:', pageWidth - margin - 48, y + 7);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
             doc.text(dateStr, pageWidth - margin - 36, y + 7);
 
             y += 18;
@@ -236,7 +238,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
 
             let custY = y + 7;
             if (customerName) {
@@ -244,7 +246,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                 doc.setTextColor(128, 0, 0);
                 doc.text('Name:', margin + 4, custY);
                 doc.setFont('helvetica', 'normal');
-                doc.setTextColor(34, 34, 34);
+                doc.setTextColor(90, 30, 30);
                 doc.text(customerName, margin + 22, custY);
                 custY += 8;
             }
@@ -253,11 +255,11 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
                 doc.setTextColor(128, 0, 0);
                 doc.text('Phone:', margin + 4, custY);
                 doc.setFont('helvetica', 'normal');
-                doc.setTextColor(34, 34, 34);
+                doc.setTextColor(90, 30, 30);
                 doc.text(customerPhone, margin + 22, custY);
             }
             if (!customerName && !customerPhone) {
-                doc.setTextColor(150, 150, 150);
+                doc.setTextColor(180, 130, 130);
                 doc.setFont('helvetica', 'italic');
                 doc.text('Walk-in Customer', margin + 4, y + 7);
             }
@@ -307,7 +309,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
 
             const metalLabel = `${metalName} ${billData.purity}`;
             const itemLabel = itemDescription || metalLabel;
@@ -353,18 +355,18 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             // Metal Value
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            doc.setTextColor(80, 80, 80);
+            doc.setTextColor(130, 70, 70);
             doc.text(`${metalName} Value (${billData.weight}gm × ${billData.purityLabel})`, labelX, breakY);
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
             doc.setFont('helvetica', 'bold');
             doc.text(formatCurrencyPlain(billData.purityValue), valueX, breakY, { align: 'right' });
             breakY += rowHeight;
 
             // Wastage
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(80, 80, 80);
+            doc.setTextColor(130, 70, 70);
             doc.text(`Wastage Charges (${adjustedWastageGrams.toFixed(3)} gm)`, labelX, breakY);
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
             doc.setFont('helvetica', 'bold');
             doc.text(formatCurrencyPlain(adjustedWastageValue), valueX, breakY, { align: 'right' });
             breakY += rowHeight;
@@ -372,9 +374,9 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             // Stones cost (if any)
             if (stonesCost > 0) {
                 doc.setFont('helvetica', 'normal');
-                doc.setTextColor(80, 80, 80);
+                doc.setTextColor(130, 70, 70);
                 doc.text('Stones / Additional Cost', labelX, breakY);
-                doc.setTextColor(34, 34, 34);
+                doc.setTextColor(90, 30, 30);
                 doc.setFont('helvetica', 'bold');
                 doc.text(formatCurrencyPlain(stonesCost), valueX, breakY, { align: 'right' });
                 breakY += rowHeight;
@@ -382,7 +384,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             // Total (Before Discount)
             doc.setFont('helvetica', 'bold');
-            doc.setTextColor(34, 34, 34);
+            doc.setTextColor(90, 30, 30);
             doc.text('Total Amount', labelX, breakY);
             doc.text(formatCurrencyPlain(billData.purityValue + adjustedWastageValue + stonesCost), valueX, breakY, { align: 'right' });
             breakY += rowHeight;
@@ -433,7 +435,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
-            doc.setTextColor(100, 100, 100);
+            doc.setTextColor(140, 80, 80);
 
             doc.text(`Pure ${metalName} Weight: ${billData.pureWeight.toFixed(3)} grams`, labelX, y + 6);
             doc.text(`Effective Rate (${billData.purity}): ${formatCurrencyPlain(billData.effectiveRate)}/gram`, labelX, y + 12);
@@ -458,7 +460,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
+            doc.setTextColor(180, 130, 130);
             doc.text('This is a computer generated estimate.', pageWidth / 2, y + 12, { align: 'center' });
 
             // Bottom ornamental border
