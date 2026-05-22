@@ -381,18 +381,18 @@ const GoldCalculator: React.FC = () => {
 
                 return (
                     <>
-                    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-                        <div className="bg-ivory rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 overflow-y-auto p-0 md:p-6 lg:p-12 flex justify-center items-start">
+                        <div className="bg-ivory rounded-none md:rounded-2xl shadow-2xl max-w-5xl w-full my-0 md:my-8 transition-all min-h-screen md:min-h-0" onClick={(e) => e.stopPropagation()}>
                             {/* NL Jewellers Branding Header */}
-                            <div className="rounded-t-xl p-6" style={{ background: 'linear-gradient(to right, #800000, #990000)' }}>
-                                <h1 className="text-3xl font-serif font-bold text-center tracking-wide mb-1" style={{ color: '#D4AF37', textShadow: '1px 1px 3px rgba(0,0,0,0.3)' }}>NL JEWELLERS</h1>
-                                <p className="text-lg text-center" style={{ color: 'rgba(255, 248, 231, 0.8)' }}>Gold</p>
+                            <div className="rounded-t-none md:rounded-t-2xl p-10 md:p-14 text-center" style={{ background: 'linear-gradient(to right, #800000, #990000)' }}>
+                                <h1 className="text-5xl md:text-6xl font-serif font-bold tracking-widest mb-3" style={{ color: '#D4AF37', textShadow: '2px 2px 4px rgba(0,0,0,0.4)' }}>NL JEWELLERS</h1>
+                                <p className="text-2xl md:text-3xl font-medium tracking-wide" style={{ color: 'rgba(255, 248, 231, 0.9)' }}>Gold Price Breakdown</p>
                             </div>
 
-                            <div className="p-6">
+                            <div className="p-8 md:p-14 space-y-8">
                                 <div className="mb-6">
                                     <h2
-                                        className="text-2xl font-serif font-bold text-accent-maroon cursor-pointer select-none text-center"
+                                        className="text-4xl md:text-5xl font-serif font-bold text-accent-maroon cursor-pointer select-none text-center py-2"
                                         onClick={() => {
                                             const newCount = closeClickCount + 1;
                                             setCloseClickCount(newCount);
@@ -406,119 +406,119 @@ const GoldCalculator: React.FC = () => {
                                     </h2>
                                 </div>
 
-                                <div className="space-y-4">
+                                <div className="space-y-8">
                                     {/* Basic Details */}
-                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">📊 Item Details</h3>
-                                        <div className="space-y-2 text-base">
+                                    <div className="bg-white/60 p-8 md:p-10 rounded-2xl border-2 border-primary-gold/40 shadow-md">
+                                        <h3 className="font-serif font-bold text-accent-maroon mb-6 text-center text-2xl md:text-3xl border-b border-primary-gold/20 pb-3">📊 Item Details</h3>
+                                        <div className="space-y-6 text-xl md:text-2xl">
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Gold Type:</span>
-                                                <span className="font-semibold text-text-main">{purity} ({purity === '916' ? '22 Karat' : '18 Karat'})</span>
+                                                <span className="font-bold text-text-main">{purity} ({purity === '916' ? '22 Karat' : '18 Karat'})</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Total Weight:</span>
-                                                <span className="font-semibold text-text-main">{weight} grams</span>
+                                                <span className="font-bold text-text-main">{weight} grams</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Purity:</span>
-                                                <span className="font-semibold text-text-main">{purityPercentage} Pure Gold</span>
+                                                <span className="font-bold text-text-main">{purityPercentage} Pure Gold</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-text-main/70">Pure Gold Weight:</span>
-                                                <span className="font-semibold text-text-main">{pureGoldWeight.toFixed(3)} grams</span>
+                                            <div className="flex justify-between border-t border-dashed border-primary-gold/20 pt-4">
+                                                <span className="text-text-main/70 font-semibold">Pure Gold Weight:</span>
+                                                <span className="font-bold text-accent-maroon">{pureGoldWeight.toFixed(3)} grams</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Rate Information */}
-                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">💵 Rate Information</h3>
-                                        <div className="space-y-2 text-base">
+                                    <div className="bg-white/60 p-8 md:p-10 rounded-2xl border-2 border-primary-gold/40 shadow-md">
+                                        <h3 className="font-serif font-bold text-accent-maroon mb-6 text-center text-2xl md:text-3xl border-b border-primary-gold/20 pb-3">💵 Rate Information</h3>
+                                        <div className="space-y-6 text-xl md:text-2xl">
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Gold Rate (24K/gram):</span>
-                                                <span className="font-semibold text-text-main">{formatCurrency(price)}</span>
+                                                <span className="font-bold text-text-main">{formatCurrency(price)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-text-main/70">Effective Rate ({purity}):</span>
-                                                <span className="font-semibold text-text-main">{formatCurrency(effectiveGoldRate)}/gram</span>
+                                            <div className="flex justify-between border-t border-dashed border-primary-gold/20 pt-4">
+                                                <span className="text-text-main/70 font-semibold">Effective Rate ({purity}):</span>
+                                                <span className="font-bold text-accent-maroon">{formatCurrency(effectiveGoldRate)}/gram</span>
                                             </div>
-                                            <div className="text-xs text-text-main/60 pl-4 italic">
+                                            <div className="text-sm text-text-main/60 pl-4 italic text-right">
                                                 ({formatCurrency(price)} × {purityPercentage})
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Detailed Calculation */}
-                                    <div className="bg-white/50 p-5 rounded-lg border border-primary-gold/30">
-                                        <h3 className="font-semibold text-accent-maroon mb-3 text-center text-lg">🧮 Price Calculation</h3>
-                                        <div className="space-y-3 text-base">
+                                    <div className="bg-white/60 p-8 md:p-10 rounded-2xl border-2 border-primary-gold/40 shadow-md">
+                                        <h3 className="font-serif font-bold text-accent-maroon mb-6 text-center text-2xl md:text-3xl border-b border-primary-gold/20 pb-3">🧮 Price Calculation</h3>
+                                        <div className="space-y-6 text-xl md:text-2xl">
                                             {/* Gold Value */}
                                             <div>
                                                 <div className="flex justify-between">
-                                                    <span className="text-text-main/70 font-medium">1. Gold Value:</span>
-                                                    <span className="font-semibold text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
+                                                    <span className="text-text-main/70 font-semibold">1. Gold Value:</span>
+                                                    <span className="font-bold text-text-main">{formatCurrency(selectedResult.purityValue)}</span>
                                                 </div>
-                                                <div className="text-sm text-text-main/60 pl-4 mt-1">
+                                                <div className="text-base text-text-main/60 pl-4 mt-1">
                                                     {weight} grams × {formatCurrency(effectiveGoldRate)}/gram
                                                 </div>
                                             </div>
 
                                             {/* Wastage Charges */}
-                                            <div className="pt-2 border-t border-primary-gold/20">
+                                            <div className="pt-4 border-t border-primary-gold/20">
                                                 <div className="flex justify-between">
-                                                    <span className="text-text-main/70 font-medium">2. Wastage Charges:</span>
-                                                    <span className="font-semibold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
+                                                    <span className="text-text-main/70 font-semibold">2. Wastage Charges:</span>
+                                                    <span className="font-bold text-text-main">{formatCurrency(selectedResult.wastageValue)}</span>
                                                 </div>
-                                                <div className="text-sm text-text-main/60 pl-4 mt-1">
-                                                    Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams
+                                                <div className="text-base text-text-main/60 pl-4 mt-1">
+                                                    Weight equivalent: {selectedResult.wastageInGrams.toFixed(3)} grams ({selectedResult.percent}% wastage)
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Total */}
-                                    <div className="bg-gradient-to-r from-primary-gold/30 to-primary-gold/20 p-5 rounded-lg border-2 border-primary-gold/50">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-bold text-xl text-accent-maroon">Total Amount:</span>
-                                            <span className="font-bold text-2xl text-accent-maroon">{formatCurrency(selectedResult.total)}</span>
+                                    <div className="bg-gradient-to-r from-primary-gold/45 to-primary-gold/30 p-10 md:p-12 rounded-2xl border-3 border-primary-gold shadow-lg">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="font-serif font-bold text-3xl md:text-4xl text-accent-maroon">Total Amount:</span>
+                                            <span className="font-serif font-extrabold text-4xl md:text-5xl text-accent-maroon">{formatCurrency(selectedResult.total)}</span>
                                         </div>
-                                        <div className="text-sm text-text-main/70 text-center">
+                                        <div className="text-lg md:text-xl font-medium text-accent-maroon/80 text-center">
                                             ({formatCurrency(selectedResult.purityValue)} + {formatCurrency(selectedResult.wastageValue)})
                                         </div>
                                     </div>
 
                                     {/* Per Gram Summary */}
-                                    <div className="bg-white/50 p-4 rounded-lg border border-primary-gold/20">
-                                        <h4 className="font-semibold text-accent-maroon mb-2 text-center">📏 Per Gram Summary</h4>
-                                        <div className="text-sm space-y-1">
+                                    <div className="bg-white/60 p-8 md:p-10 rounded-2xl border-2 border-primary-gold/30 shadow-md">
+                                        <h4 className="font-serif font-bold text-accent-maroon mb-5 text-center text-xl md:text-2xl">📏 Per Gram Summary</h4>
+                                        <div className="text-lg md:text-xl space-y-4">
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Effective cost per gram:</span>
-                                                <span className="font-medium">{formatCurrency(selectedResult.total / weight)}/gram</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.total / weight)}/gram</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-text-main/70">Pure gold per gram:</span>
-                                                <span className="font-medium">{formatCurrency(selectedResult.purityValue / weight)}/gram</span>
+                                                <span className="font-semibold text-text-main">{formatCurrency(selectedResult.purityValue / weight)}/gram</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-6 space-y-3">
+                                <div className="mt-10 space-y-5">
                                     <button
                                         onClick={() => setShowBillGenerator(true)}
-                                        className="w-full font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-white shadow-md"
+                                        className="w-full font-bold py-5 px-8 rounded-2xl transition-all flex items-center justify-center gap-4 text-white shadow-xl text-xl md:text-2xl hover:shadow-2xl active:scale-98 cursor-pointer"
                                         style={{ background: 'linear-gradient(to right, #800000, #990000)' }}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         Generate Bill (PDF)
                                     </button>
                                     <button
                                         onClick={handleShare}
-                                        className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                        className="w-full bg-green-600 text-white font-bold py-5 px-8 rounded-2xl hover:bg-green-700 transition-colors flex items-center justify-center gap-4 text-xl md:text-2xl shadow-xl active:scale-98 cursor-pointer"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                         </svg>
                                         Share as Text
