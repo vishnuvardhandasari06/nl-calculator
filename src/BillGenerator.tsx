@@ -167,7 +167,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
 
             // Shop name
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(22);
+            doc.setFontSize(28);
             doc.setTextColor(212, 175, 55);
             doc.text('NL JEWELLERS', pageWidth / 2, margin + 18, { align: 'center' });
 
@@ -447,21 +447,19 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             // Ornamental gold divider
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.8);
-            doc.line(margin + 20, y, pageWidth - margin - 20, y);
+            doc.line(margin + 20, pageHeight - 30, pageWidth - margin - 20, pageHeight - 30);
             doc.setLineWidth(0.3);
-            doc.line(margin + 30, y + 2, pageWidth - margin - 30, y + 2);
-
-            y += 8;
+            doc.line(margin + 30, pageHeight - 28, pageWidth - margin - 30, pageHeight - 28);
 
             doc.setFont('helvetica', 'italic');
             doc.setFontSize(12);
             doc.setTextColor(128, 0, 0);
-            doc.text('Thank you for choosing NL Jewellers!', pageWidth / 2, y + 4, { align: 'center' });
+            doc.text('Thank you for choosing NL Jewellers!', pageWidth / 2, pageHeight - 22, { align: 'center' });
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
             doc.setTextColor(180, 130, 130);
-            doc.text('This is a computer generated estimate.', pageWidth / 2, y + 12, { align: 'center' });
+            doc.text('This is a computer generated estimate.', pageWidth / 2, pageHeight - 14, { align: 'center' });
 
             // Bottom ornamental border
             doc.setFillColor(212, 175, 55);
