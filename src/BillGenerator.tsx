@@ -454,12 +454,7 @@ const BillGenerator: React.FC<BillGeneratorProps> = ({ isOpen, onClose, billData
             doc.setFont('helvetica', 'italic');
             doc.setFontSize(12);
             doc.setTextColor(128, 0, 0);
-            doc.text('Thank you for choosing NL Jewellers!', pageWidth / 2, pageHeight - 22, { align: 'center' });
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.setTextColor(180, 130, 130);
-            doc.text('This is a computer generated estimate.', pageWidth / 2, pageHeight - 14, { align: 'center' });
+            doc.text('Thank you for choosing NL Jewellers!', pageWidth / 2, pageHeight - 18, { align: 'center' });
 
             // Bottom ornamental border
             doc.setFillColor(212, 175, 55);
